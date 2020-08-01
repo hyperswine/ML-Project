@@ -1,14 +1,19 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Example user template template
-### Example user template
-
 # IntelliJ project files
 .idea
 *.iml
 out
 gen
-/dataset/
+
+# Virtual Environment
 /env/
+
+# VS Code
 .vscode
+
+# Misc.
 .ipynb_checkpoints
 bash.exe.*
+__pycache__
+/*__pycache__
+
+# ADD ANY OTHER DIRECTORIES/FILES HERE
