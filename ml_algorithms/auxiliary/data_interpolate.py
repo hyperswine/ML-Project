@@ -11,7 +11,7 @@ import pandas as pd
 
 # Features
 straight_features = ["memory_internal",
-                     "main_camera_single", "main_camera_video", "misc_price",
+                     "main_camera_single", "main_camera_video",
                      "selfie_camera_video",
                      "selfie_camera_single", "battery"]
 

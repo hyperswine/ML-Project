@@ -41,8 +41,7 @@ def feature_selection(df):
     # NOTE: 5 classes default. Switch this to 'y_classify' for 3 classes.
     # 5 classes seems to result in a higher performance with both classifiers
     y = y.apply(y_classify_five)
-    X = df.drop(["misc_price"], axis=1)
-    X = df.drop(["key_index"], axis=1)
+    X = df.drop(["key_index", "misc_price"], axis=1)
     rand_forest = RandomForestClassifier(n_estimators=500,n_jobs=-1)
 
     rand_forest.fit(X,y)
