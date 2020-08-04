@@ -38,9 +38,9 @@ def feature_selection(df):
     Output the features that are the most important in the feature dataframe
     """
     y = df["misc_price"]
-    # NOTE: 5 classes default. Switch this to 'y_classify' for 3 classes.
-    # 5 classes seems to result in a higher performance with both classifiers
-    y = y.apply(y_classify_five)
+    # NOTE: 3 classes default. Switch this to 'y_classify+_five' for 5 classes.
+    # 3 classes seems to result in a higher performance with both classifiers
+    y = y.apply(y_classify)
     X = df.drop(["key_index", "misc_price"], axis=1)
     rand_forest = RandomForestClassifier(n_estimators=500,n_jobs=-1)
 
