@@ -6,6 +6,7 @@ gen
 
 # Virtual Environment
 /env/
+*env*
 
 # VS Code
 .vscode

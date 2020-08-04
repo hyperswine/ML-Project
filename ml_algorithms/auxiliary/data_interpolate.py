@@ -72,7 +72,7 @@ def fill_gaps(df):
     # df_ret[df_ret.columns] = s_imp.fit_transform(df_ret[df_ret.columns])
 
     # TODO: Apply smoothing function (exponential, gaussian).
-
+    
 
     # TEMPORARY: drop cols
     df_ret.dropna(inplace=True)
