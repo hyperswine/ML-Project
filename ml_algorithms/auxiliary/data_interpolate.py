@@ -22,7 +22,7 @@ all_features = ["oem", "launch_announced", "launch_status", "body_dimensions", "
                 "selfie_camera_single", "battery"]
 
 final_features = ["oem", "launch_announced", "body_dimensions", "screen_size", "scn_bdy_ratio",
-                  "features_sensors", "clock_speed", "platform_gpu", "memory_internal",
+                  "features_sensors", "clock_speed", "platform_gpu", "ram", "rom",
                   "main_camera_single", "main_camera_video", "misc_price",
                   "selfie_camera_video",
                   "selfie_camera_single", "battery"]
@@ -69,14 +69,15 @@ def fill_gaps(df):
     # Remove outliers for each column, if they are 1.5X IQR for the column.
     # df_ret = rem_outliers(df_ret)
 
+    x = input("About to Impute, press any key to continue: ")
+
     # Impute missing data, i.e. NaN.
     df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
     df_impute.columns = df_ret.columns
     df_impute.index = df_ret.index
 
     print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
-    x = input("Press any key to continue: ")
-
+   
     df_impute.to_csv('imputed_df.csv')
     print("DF has been output to imputed_df.csv")
 

@@ -90,8 +90,11 @@ def sensor(string):
     return len([sensor for sensor in sensors if (sensor in string.lower())])
 
 
+# TODO: fix this. This should check whether '4K' or '2K' appear first before '1080p' etc.
+# Return the value '1080', '2160' if found, with no 'p'
 def cam_vid(string):
-    string = str(string)
+    if not string or type(string)==float:
+        return str(0)
 
     p_string = re.search(r"\d+p", string)
     k_string = ""
@@ -105,22 +108,17 @@ def cam_vid(string):
         if '4' in k_string.group(0):
             return '2160p'
 
-    return p_string.group(0) if p_string else str(0)
+    return p_string.group(0) if p_string else None
 
 
 # The pattern is 'x MP'. Do not accept any other pattern.
 def cam_snap(string):
-    if not string:
-        return None
+    if not string or type(string)==float:
+        return str(0)
 
-    string = str(string).lower()
+    mp_string = re.search(r"\d+\.{0,1}\d+(?=mp)", string.lower().replace(" ", ""))
 
-    mp_string = re.search(r"\d+\.{0,1}\d+ mp", string)
-
-    if not mp_string:
-        return None
-
-    return mp_string.group(0)
+    return mp_string.group(0) if mp_string else None
 
 
 def os(string):
@@ -202,14 +200,16 @@ def get_ram(string):
     if type(string)==float:
         return None
     
+    # print("string is,", string)
+
     # get rid of spaces
     string = string.replace(" ", "")
     
     if "RAM" in string:
-        x = re.search(r'(\d+(G|M)B)(?=+RAM)', string)
+        x = re.search(r'\d+(G|M)B(?=RAM)', string)
         if x:
             x = x.group(0)
-            print("x is", x)
+            # print("x is", x)
 
             if "GB" in x:
                 # get the word before GB
@@ -230,16 +230,19 @@ def get_rom(string):
     # float means that string is 'NaN'
     if type(string)==float:
         return None
+    
+    # print("string is,", string)
 
     # get rid of spaces
     string = string.replace(" ", "")
 
     if "ROM" in string:
-        x = re.search(r'(\d+(G|M)B)(?=+ROM)', string)
+        # TODO: error - > "nothing to repeat at position 14?"
+        x = re.search(r'\d+(G|M)B(?=ROM)', string)
         if x:
             x = x.group(0)
 
-            print("x is", x)
+            # print("x is", x)
 
             if "GB" in x:
                 # get the word before GB
@@ -384,7 +387,7 @@ def clean_data(df):
     df['oem'] = enc.fit_transform(oem)
     df['oem'] = df.oem.apply(pd.to_numeric)
 
-    x = input("Extraction over. Continue to imputing & null drop phase? [Any Key to Continue]: ")
+    # x = input("Extraction over. Continue to imputing & null drop phase? [Any Key to Continue]: ")
 
     # Impute missing data & remove outliers
     df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
