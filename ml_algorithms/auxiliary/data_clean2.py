@@ -14,6 +14,7 @@ from data_interpolate import *
 
 # TODO: Other features like 'body_weight' and 'body_sim' could be included.
 
+
 def extract_straight(df):
     for feature in straight_features:
         s = df[feature]
@@ -104,7 +105,7 @@ def cam_vid(string):
         if '4' in k_string.group(0):
             return '2160p'
 
-    return p_string.group(0)
+    return p_string.group(0) if p_string else str(0)
 
 
 # The pattern is 'x MP'. Do not accept any other pattern.
@@ -118,7 +119,7 @@ def cam_snap(string):
 
     if not mp_string:
         return None
-    
+
     return mp_string.group(0)
 
 
@@ -180,14 +181,85 @@ def core_count(string):
     return str(count)
 
 
-# TODO 1: extract the first numeric \d+ -> ROM
-# TODO 2: second numeric \d+ -> RAM. 
 # NOTE accept MB or GB only.
 def extract_rom_ram(df):
     """
     Split memory internal to 'ram' and 'rom'.
+    There is some boiler-plate code in the get_ram/rom functions & someone can abstract it if they want to.
     """
-    pass
+    # Get ROM in MB
+    df['rom'] = df['memory_internal'].apply(get_rom)
+
+    # Get RAM in MB
+    df['ram'] = df['memory_internal'].apply(get_ram)
+
+    return df.drop(['memory_internal'], axis=1)
+
+
+# Return the ram in MB
+def get_ram(string):
+    # float means that string is 'NaN'
+    if type(string)==float:
+        return None
+    
+    # get rid of spaces
+    string = string.split()
+    
+    if "RAM" in string:
+        x = re.search(r'\w+(?=\s+RAM)', string)
+        if x:
+            x = x.group(0)
+
+            print("x is", x)
+
+            if "GB" in x:
+                # get the word before GB
+                y = re.search(r'\w+(?=GB)', x).group(0)
+                return str(float(y)*1000)
+            if "MB" in x:
+                y = re.search(r'\w+(?=MB)', x).group(0)
+                return str(y)
+
+            print(f"Something weird happened with {string}")
+            return string
+
+    return str(0)
+
+
+# Return the rom in MB
+def get_rom(string):
+    # float means that string is 'NaN'
+    if type(string)==float:
+        return None
+
+    if "ROM" in string:
+        x = re.search(r'\w+(?=\s+ROM)', string)
+        if x:
+            x = x.group(0)
+
+            print("x is", x)
+
+            if "GB" in x:
+                # get the word before GB
+                y = re.search(r'\w+(?=GB)', x).group(0)
+                return str(float(y)*1000)
+            if "MB" in x:
+                y = re.search(r'\w+(?=MB)', x).group(0)
+                return str(y)
+
+            print(f"Something weird happened with {string}")
+            return string
+
+    # else split the string and consider the first word
+    s_string = string.split()[0]
+    ret = 0
+    if "GB" in s_string:
+        ret = float(s_string.split('GB')[0]) * 1000
+    # assume the word refers to the ROM
+    elif "MB" in s_string:
+        ret = float(s_string.split('MB')[0])
+
+    return str(ret)
 
 
 def extract_cpu(df):
@@ -306,6 +378,8 @@ def clean_data(df):
     enc = LabelEncoder()
     df['oem'] = enc.fit_transform(oem)
     df['oem'] = df.oem.apply(pd.to_numeric)
+
+    x = input("Extraction over. Continue to imputing & null drop phase? [Any Key to Continue]: ")
 
     # Impute missing data & remove outliers
     df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
