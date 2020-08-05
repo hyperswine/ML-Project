@@ -10,7 +10,7 @@ from functools import reduce
 from sklearn.preprocessing import LabelEncoder
 import math
 
-from data_interpolate import *
+from .data_interpolate import *
 
 # TODO: Other features like 'body_weight' and 'body_sim' could be included.
 
@@ -96,19 +96,19 @@ def cam_vid(string):
     if not string or type(string)==float:
         return str(0)
 
-    p_string = re.search(r"\d+p", string)
-    k_string = ""
-
-    if not p_string:
-        k_string = re.search(r"\d+", string.lower())
-        if not k_string:
-            return string
+    k_string = re.search(r"\d+k", string.lower())
+    if k_string:
         if '2' in k_string.group(0):
-            return '1080p'
+            return '1080'
         if '4' in k_string.group(0):
-            return '2160p'
+            return '2160'
 
-    return p_string.group(0) if p_string else None
+    p_string = re.search(r"\d+(?=p)", string)
+
+    if p_string:
+        return p_string.group(0)
+
+    return None
 
 
 # The pattern is 'x MP'. Do not accept any other pattern.

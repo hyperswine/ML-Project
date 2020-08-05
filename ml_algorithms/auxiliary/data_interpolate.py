@@ -69,7 +69,7 @@ def fill_gaps(df):
     # Remove outliers for each column, if they are 1.5X IQR for the column.
     # df_ret = rem_outliers(df_ret)
 
-    x = input("About to Impute, press any key to continue: ")
+    # x = input("About to Impute, press any key to continue: ")
 
     # Impute missing data, i.e. NaN.
     df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
