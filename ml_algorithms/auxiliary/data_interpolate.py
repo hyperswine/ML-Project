@@ -1,7 +1,6 @@
 """
 Impute or Interpolate missing data according to categorical & numerical features.
 Removes outliers according to m*IQR -> (m=1.5 default).
-TODO: Add other functionality where fit.
 """
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
@@ -10,10 +9,11 @@ import pandas as pd
 
 
 # Features
-straight_features = ["memory_internal",
-                     "main_camera_single", "main_camera_video",
-                     "selfie_camera_video",
-                     "selfie_camera_single", "battery"]
+
+# straight features are straightforward to extract with \d+
+# NOTE 1: the current 'straight' feature is battery which seems to be mostly im mAH
+# NOTE 2: should still check if its actually 'mAH' and remove or convert if not
+straight_features = ["battery"]
 
 all_features = ["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",
                 "features_sensors", "platform_os", "platform_cpu", "platform_gpu", "memory_internal",
@@ -21,17 +21,20 @@ all_features = ["oem", "launch_announced", "launch_status", "body_dimensions", "
                 "selfie_camera_video",
                 "selfie_camera_single", "battery"]
 
-final_features = ["oem", "launch_announced", "launch_status", "body_dimensions", "screen_size", "scn_bdy_ratio", "comms_wlan", "comms_usb",
-                  "features_sensors", "platform_os", "core_count", "clock_speed", "platform_gpu", "memory_internal",
+final_features = ["oem", "launch_announced", "body_dimensions", "screen_size", "scn_bdy_ratio",
+                  "features_sensors", "clock_speed", "platform_gpu", "memory_internal",
                   "main_camera_single", "main_camera_video", "misc_price",
                   "selfie_camera_video",
                   "selfie_camera_single", "battery"]
+
+cols_to_drop = ['launch_status',
+                'comms_wlan', 'comms_usb', 'platform_os', 'core_count']
 
 numeric_features = ["body_dimensions", "screen_size", "scn_bdy_ratio", "clock_speed", "memory_internal",
                     "main_camera_single", "main_camera_video", "misc_price",
                     "selfie_camera_video",
                     "selfie_camera_single", "battery"]
-
+# TODO: there are some categorical features like 'main_camera_features' & etc. These features should also be included.
 
 def rem_outliers(df):
     for feature in numeric_features:
@@ -51,8 +54,6 @@ def rem_outliers(df):
     return df
 
 
-# TODO: Since we are basically trying to interpolate over 90% of the missing data points
-# It may be better to just use the ~700-800 examples available after outlier removal.
 def fill_gaps(df):
     # NOTE: Can also use some interpolation (linear, cubic) instead.
     i_imp = IterativeImputer(max_iter=20, random_state=6)
@@ -69,7 +70,15 @@ def fill_gaps(df):
     # df_ret = rem_outliers(df_ret)
 
     # Impute missing data, i.e. NaN.
-    # df_ret[df_ret.columns] = s_imp.fit_transform(df_ret[df_ret.columns])
+    df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
+    df_impute.columns = df_ret.columns
+    df_impute.index = df_ret.index
+
+    print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
+    x = input("Press any key to continue: ")
+
+    df_impute.to_csv('imputed_df.csv')
+    print("DF has been output to imputed_df.csv")
 
     # TODO: Apply smoothing function (exponential, gaussian).
     

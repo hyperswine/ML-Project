@@ -10,9 +10,10 @@ from functools import reduce
 from sklearn.preprocessing import LabelEncoder
 import math
 
-from .data_interpolate import *
+from data_interpolate import *
 
-# TODO: change this such that cameras are '0' if we cannot regex them.
+# TODO: Other features like 'body_weight' and 'body_sim' could be included.
+
 def extract_straight(df):
     for feature in straight_features:
         s = df[feature]
@@ -85,7 +86,7 @@ def sensor(string):
     sensors = ['accelerometer', 'proximity',
                'compass', 'gyro', 'fingerprint', 'barometer']
 
-    return len([ sensor for sensor in sensors if (sensor in string.lower()) ])
+    return len([sensor for sensor in sensors if (sensor in string.lower())])
 
 
 def cam_vid(string):
@@ -103,7 +104,22 @@ def cam_vid(string):
         if '4' in k_string.group(0):
             return '2160p'
 
-    return string
+    return p_string.group(0)
+
+
+# The pattern is 'x MP'. Do not accept any other pattern.
+def cam_snap(string):
+    if not string:
+        return None
+
+    string = str(string).lower()
+
+    mp_string = re.search(r"\d+\.{0,1}\d+ mp", string)
+
+    if not mp_string:
+        return None
+    
+    return mp_string.group(0)
 
 
 def os(string):
@@ -136,11 +152,11 @@ def extract_screen_in(df):
     """
     # Regex for screen size in inches
     df['screen_size'] = df['display_size'].apply(
-        lambda x: re.search(r'^.*(?=( inches))', str(x).lower()) )
+        lambda x: re.search(r'^.*(?=( inches))', str(x).lower()))
 
     # Regex for screen-body ratio
     df['scn_bdy_ratio'] = df['display_size'].apply(
-        lambda x: re.search(r'\d{1,2}.\d(?=%)', str(x).lower()) )
+        lambda x: re.search(r'\d{1,2}.\d(?=%)', str(x).lower()))
 
     # Apply results, NOTE: pandas doesn't like it when we're applying to multiple series.
     results1 = df['scn_bdy_ratio'].apply(lambda y: y.group(0) if y else None)
@@ -162,6 +178,16 @@ def core_count(string):
             break
 
     return str(count)
+
+
+# TODO 1: extract the first numeric \d+ -> ROM
+# TODO 2: second numeric \d+ -> RAM. 
+# NOTE accept MB or GB only.
+def extract_rom_ram(df):
+    """
+    Split memory internal to 'ram' and 'rom'.
+    """
+    pass
 
 
 def extract_cpu(df):
@@ -197,7 +223,8 @@ def get_clk_speed(string):
 
 # Convert strings that have 'ghz' to '1000*x mhx' where x is in ghz.
 def ghz_to_mhz(string):
-    if not string or 'ghz' not in string: return string
+    if not string or 'ghz' not in string:
+        return string
 
     temp = float(string.split()[0])
 
@@ -220,15 +247,15 @@ def extract_price(string):
     # case 0: EUR is present -> convert to usd
     if "EUR" in string:
         price = re.search("\d+\.{0,1}\d+", string)
-        if price: 
+        if price:
             final_price = float(price.group(0)) * 1.18
 
     # case 1: INDR (rupees) is present -> convert to usd
     elif "INR" in string:
         price = re.search("\d+\.{0,1}\d+", string)
-        if price: 
+        if price:
             final_price = float(price.group(0)) * 0.013
-    
+
     elif "USD" in string:
         price = re.search("\d+\.{0,1}\d+", string)
         if price:
@@ -245,11 +272,15 @@ def extract_price(string):
 
 
 # Function Map
-f_map = {"launch_announced": launch_announced, "launch_status": available_discontinued,
-         "body_dimensions": squared_dimensions, "comms_wlan": wlan,
-         "comms_usb": usb_type,
-         "features_sensors": sensor, "platform_os": os,
-         "platform_gpu": gpu_platform}
+f_map = {"launch_announced": launch_announced,
+         "body_dimensions": squared_dimensions,
+         "features_sensors": sensor,
+         "platform_gpu": gpu_platform,
+         "main_camera_video": cam_vid,
+         "main_camera_single": cam_snap,
+         "selfie_camera_video": cam_vid,
+         "selfie_camera_single": cam_snap,
+         }
 
 
 def clean_data(df):
@@ -263,19 +294,21 @@ def clean_data(df):
     df = extract_f(df)
     df = extract_cpu(df)
     df = extract_screen_in(df)
-    
+    df = extract_rom_ram(df)
+
     # Retreive price
     df["misc_price"] = df["misc_price"].apply(extract_price)
 
     # Encode 'OEM' with label-encoder after lower().
-    oem = df.oem.apply(lambda string: ''.join(c for c in string if c.isalnum()).lower())
+    oem = df.oem.apply(lambda string: ''.join(
+        c for c in string if c.isalnum()).lower())
     oem = oem.apply(lambda x: str(x))
     enc = LabelEncoder()
     df['oem'] = enc.fit_transform(oem)
     df['oem'] = df.oem.apply(pd.to_numeric)
 
     # Impute missing data & remove outliers
-    df_ret = fill_gaps(df)
+    df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
     df_ret.set_index('key_index')
     print(df_ret.index)
 
@@ -286,7 +319,9 @@ def clean_data(df):
 if __name__ == '__main__':
 
     # Open Dataset
-    data = pd.read_csv('C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
+    # NOTE: change the path to your own path.
+    data = pd.read_csv(
+        'C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
 
     # Extract relevant features (for now)
     data_features = data[all_features]
