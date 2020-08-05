@@ -203,13 +203,12 @@ def get_ram(string):
         return None
     
     # get rid of spaces
-    string = string.split()
+    string = string.replace(" ", "")
     
     if "RAM" in string:
-        x = re.search(r'\w+(?=\s+RAM)', string)
+        x = re.search(r'(\d+(G|M)B)(?=+RAM)', string)
         if x:
             x = x.group(0)
-
             print("x is", x)
 
             if "GB" in x:
@@ -232,8 +231,11 @@ def get_rom(string):
     if type(string)==float:
         return None
 
+    # get rid of spaces
+    string = string.replace(" ", "")
+
     if "ROM" in string:
-        x = re.search(r'\w+(?=\s+ROM)', string)
+        x = re.search(r'(\d+(G|M)B)(?=+ROM)', string)
         if x:
             x = x.group(0)
 
@@ -251,12 +253,15 @@ def get_rom(string):
             return string
 
     # else split the string and consider the first word
-    s_string = string.split()[0]
+    s_string = string.split()
+    if len(s_string) < 2:
+         return str(0)
+
     ret = 0
-    if "GB" in s_string:
+    if "GB" in s_string[0] or "GB" in s_string[1]:
         ret = float(s_string.split('GB')[0]) * 1000
     # assume the word refers to the ROM
-    elif "MB" in s_string:
+    elif "MB" in s_string[0] or "GB" in s_string[1]:
         ret = float(s_string.split('MB')[0])
 
     return str(ret)
