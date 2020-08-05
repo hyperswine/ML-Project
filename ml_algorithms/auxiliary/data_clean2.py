@@ -8,10 +8,11 @@ import pandas as pd
 import numpy as np
 from functools import reduce
 from sklearn.preprocessing import LabelEncoder
+import math
 
 from .data_interpolate import *
 
-
+# TODO: change this such that cameras are '0' if we cannot regex them.
 def extract_straight(df):
     for feature in straight_features:
         s = df[feature]
@@ -201,7 +202,47 @@ def ghz_to_mhz(string):
     temp = float(string.split()[0])
 
     return str(temp*1000) + ' mhz'
+
+
+# Extract the misc price.
+def extract_price(string):
+    price = None
+    final_price = None
+
+    # print("string is", string)
+    # print("string type is", type(string))
+    if not string:
+        return None
+    # the data should be all string, except if their NaN
+    if type(string) == float or type(string) == int:
+        return None
+
+    # case 0: EUR is present -> convert to usd
+    if "EUR" in string:
+        price = re.search("\d+\.{0,1}\d+", string)
+        if price: 
+            final_price = float(price.group(0)) * 1.18
+
+    # case 1: INDR (rupees) is present -> convert to usd
+    elif "INR" in string:
+        price = re.search("\d+\.{0,1}\d+", string)
+        if price: 
+            final_price = float(price.group(0)) * 0.013
     
+    elif "USD" in string:
+        price = re.search("\d+\.{0,1}\d+", string)
+        if price:
+            final_price = price.group(0)
+
+    # case 2: price is between '<><> ... <><>' tags
+    else:
+        price = re.search("(?<=\>)(\d+\.{0,1}\d+)", string)
+        if price:
+            final_price = price.group(0)
+
+    # print("final price is", final_price)
+    return str(final_price) if final_price else None
+
 
 # Function Map
 f_map = {"launch_announced": launch_announced, "launch_status": available_discontinued,
@@ -222,6 +263,9 @@ def clean_data(df):
     df = extract_f(df)
     df = extract_cpu(df)
     df = extract_screen_in(df)
+    
+    # Retreive price
+    df["misc_price"] = df["misc_price"].apply(extract_price)
 
     # Encode 'OEM' with label-encoder after lower().
     oem = df.oem.apply(lambda string: ''.join(c for c in string if c.isalnum()).lower())
@@ -232,6 +276,8 @@ def clean_data(df):
 
     # Impute missing data & remove outliers
     df_ret = fill_gaps(df)
+    df_ret.set_index('key_index')
+    print(df_ret.index)
 
     # Return final dataframe containing cleaned & filled data
     return df_ret
@@ -240,7 +286,7 @@ def clean_data(df):
 if __name__ == '__main__':
 
     # Open Dataset
-    data = pd.read_csv('C:/Users/capta/Desktop/Project-Report/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
+    data = pd.read_csv('C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
 
     # Extract relevant features (for now)
     data_features = data[all_features]

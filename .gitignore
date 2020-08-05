@@ -6,6 +6,7 @@ gen
 
 # Virtual Environment
 /env/
+*env*
 
 # VS Code
 .vscode
@@ -17,3 +18,4 @@ __pycache__
 /*__pycache__
 
 # ADD ANY OTHER DIRECTORIES/FILES HERE
+*Report*
