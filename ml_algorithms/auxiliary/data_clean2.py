@@ -12,7 +12,9 @@ import math
 
 from .data_interpolate import *
 
-# TODO: change this such that cameras are '0' if we cannot regex them.
+# TODO: Other features like 'body_weight' and 'body_sim' could be included.
+
+
 def extract_straight(df):
     for feature in straight_features:
         s = df[feature]
@@ -85,25 +87,38 @@ def sensor(string):
     sensors = ['accelerometer', 'proximity',
                'compass', 'gyro', 'fingerprint', 'barometer']
 
-    return len([ sensor for sensor in sensors if (sensor in string.lower()) ])
+    return len([sensor for sensor in sensors if (sensor in string.lower())])
 
 
+# TODO: fix this. This should check whether '4K' or '2K' appear first before '1080p' etc.
+# Return the value '1080', '2160' if found, with no 'p'
 def cam_vid(string):
-    string = str(string)
+    if not string or type(string)==float:
+        return str(0)
 
-    p_string = re.search(r"\d+p", string)
-    k_string = ""
-
-    if not p_string:
-        k_string = re.search(r"\d+", string.lower())
-        if not k_string:
-            return string
+    k_string = re.search(r"\d+k", string.lower())
+    if k_string:
         if '2' in k_string.group(0):
-            return '1080p'
+            return '1080'
         if '4' in k_string.group(0):
-            return '2160p'
+            return '2160'
 
-    return string
+    p_string = re.search(r"\d+(?=p)", string)
+
+    if p_string:
+        return p_string.group(0)
+
+    return None
+
+
+# The pattern is 'x MP'. Do not accept any other pattern.
+def cam_snap(string):
+    if not string or type(string)==float:
+        return str(0)
+
+    mp_string = re.search(r"\d+\.{0,1}\d+(?=mp)", string.lower().replace(" ", ""))
+
+    return mp_string.group(0) if mp_string else None
 
 
 def os(string):
@@ -136,11 +151,11 @@ def extract_screen_in(df):
     """
     # Regex for screen size in inches
     df['screen_size'] = df['display_size'].apply(
-        lambda x: re.search(r'^.*(?=( inches))', str(x).lower()) )
+        lambda x: re.search(r'^.*(?=( inches))', str(x).lower()))
 
     # Regex for screen-body ratio
     df['scn_bdy_ratio'] = df['display_size'].apply(
-        lambda x: re.search(r'\d{1,2}.\d(?=%)', str(x).lower()) )
+        lambda x: re.search(r'\d{1,2}.\d(?=%)', str(x).lower()))
 
     # Apply results, NOTE: pandas doesn't like it when we're applying to multiple series.
     results1 = df['scn_bdy_ratio'].apply(lambda y: y.group(0) if y else None)
@@ -162,6 +177,97 @@ def core_count(string):
             break
 
     return str(count)
+
+
+# NOTE accept MB or GB only.
+def extract_rom_ram(df):
+    """
+    Split memory internal to 'ram' and 'rom'.
+    There is some boiler-plate code in the get_ram/rom functions & someone can abstract it if they want to.
+    """
+    # Get ROM in MB
+    df['rom'] = df['memory_internal'].apply(get_rom)
+
+    # Get RAM in MB
+    df['ram'] = df['memory_internal'].apply(get_ram)
+
+    return df.drop(['memory_internal'], axis=1)
+
+
+# Return the ram in MB
+def get_ram(string):
+    # float means that string is 'NaN'
+    if type(string)==float:
+        return None
+    
+    # print("string is,", string)
+
+    # get rid of spaces
+    string = string.replace(" ", "")
+    
+    if "RAM" in string:
+        x = re.search(r'\d+(G|M)B(?=RAM)', string)
+        if x:
+            x = x.group(0)
+            # print("x is", x)
+
+            if "GB" in x:
+                # get the word before GB
+                y = re.search(r'\w+(?=GB)', x).group(0)
+                return str(float(y)*1000)
+            if "MB" in x:
+                y = re.search(r'\w+(?=MB)', x).group(0)
+                return str(y)
+
+            print(f"Something weird happened with {string}")
+            return string
+
+    return str(0)
+
+
+# Return the rom in MB
+def get_rom(string):
+    # float means that string is 'NaN'
+    if type(string)==float:
+        return None
+    
+    # print("string is,", string)
+
+    # get rid of spaces
+    string = string.replace(" ", "")
+
+    if "ROM" in string:
+        # TODO: error - > "nothing to repeat at position 14?"
+        x = re.search(r'\d+(G|M)B(?=ROM)', string)
+        if x:
+            x = x.group(0)
+
+            # print("x is", x)
+
+            if "GB" in x:
+                # get the word before GB
+                y = re.search(r'\w+(?=GB)', x).group(0)
+                return str(float(y)*1000)
+            if "MB" in x:
+                y = re.search(r'\w+(?=MB)', x).group(0)
+                return str(y)
+
+            print(f"Something weird happened with {string}")
+            return string
+
+    # else split the string and consider the first word
+    s_string = string.split()
+    if len(s_string) < 2:
+         return str(0)
+
+    ret = 0
+    if "GB" in s_string[0] or "GB" in s_string[1]:
+        ret = float(s_string.split('GB')[0]) * 1000
+    # assume the word refers to the ROM
+    elif "MB" in s_string[0] or "GB" in s_string[1]:
+        ret = float(s_string.split('MB')[0])
+
+    return str(ret)
 
 
 def extract_cpu(df):
@@ -197,7 +303,8 @@ def get_clk_speed(string):
 
 # Convert strings that have 'ghz' to '1000*x mhx' where x is in ghz.
 def ghz_to_mhz(string):
-    if not string or 'ghz' not in string: return string
+    if not string or 'ghz' not in string:
+        return string
 
     temp = float(string.split()[0])
 
@@ -220,15 +327,15 @@ def extract_price(string):
     # case 0: EUR is present -> convert to usd
     if "EUR" in string:
         price = re.search("\d+\.{0,1}\d+", string)
-        if price: 
+        if price:
             final_price = float(price.group(0)) * 1.18
 
     # case 1: INDR (rupees) is present -> convert to usd
     elif "INR" in string:
         price = re.search("\d+\.{0,1}\d+", string)
-        if price: 
+        if price:
             final_price = float(price.group(0)) * 0.013
-    
+
     elif "USD" in string:
         price = re.search("\d+\.{0,1}\d+", string)
         if price:
@@ -245,11 +352,15 @@ def extract_price(string):
 
 
 # Function Map
-f_map = {"launch_announced": launch_announced, "launch_status": available_discontinued,
-         "body_dimensions": squared_dimensions, "comms_wlan": wlan,
-         "comms_usb": usb_type,
-         "features_sensors": sensor, "platform_os": os,
-         "platform_gpu": gpu_platform}
+f_map = {"launch_announced": launch_announced,
+         "body_dimensions": squared_dimensions,
+         "features_sensors": sensor,
+         "platform_gpu": gpu_platform,
+         "main_camera_video": cam_vid,
+         "main_camera_single": cam_snap,
+         "selfie_camera_video": cam_vid,
+         "selfie_camera_single": cam_snap,
+         }
 
 
 def clean_data(df):
@@ -263,19 +374,23 @@ def clean_data(df):
     df = extract_f(df)
     df = extract_cpu(df)
     df = extract_screen_in(df)
-    
+    df = extract_rom_ram(df)
+
     # Retreive price
     df["misc_price"] = df["misc_price"].apply(extract_price)
 
     # Encode 'OEM' with label-encoder after lower().
-    oem = df.oem.apply(lambda string: ''.join(c for c in string if c.isalnum()).lower())
+    oem = df.oem.apply(lambda string: ''.join(
+        c for c in string if c.isalnum()).lower())
     oem = oem.apply(lambda x: str(x))
     enc = LabelEncoder()
     df['oem'] = enc.fit_transform(oem)
     df['oem'] = df.oem.apply(pd.to_numeric)
 
+    # x = input("Extraction over. Continue to imputing & null drop phase? [Any Key to Continue]: ")
+
     # Impute missing data & remove outliers
-    df_ret = fill_gaps(df)
+    df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
     df_ret.set_index('key_index')
     print(df_ret.index)
 
@@ -286,7 +401,9 @@ def clean_data(df):
 if __name__ == '__main__':
 
     # Open Dataset
-    data = pd.read_csv('C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
+    # NOTE: change the path to your own path.
+    data = pd.read_csv(
+        'C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
 
     # Extract relevant features (for now)
     data_features = data[all_features]
