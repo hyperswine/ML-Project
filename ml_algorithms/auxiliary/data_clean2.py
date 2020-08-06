@@ -392,7 +392,6 @@ def clean_data(df):
     # Impute missing data & remove outliers
     df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
     df_ret.set_index('key_index')
-    print(df_ret.index)
 
     # Return final dataframe containing cleaned & filled data
     return df_ret
