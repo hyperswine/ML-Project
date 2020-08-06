@@ -163,8 +163,6 @@ def extract_screen_in(df):
     df['scn_bdy_ratio'] = results1
     df['screen_size'] = results2
 
-    print(df['scn_bdy_ratio'], df['screen_size'])
-
     return df.drop(['display_size'], axis=1)
 
 
