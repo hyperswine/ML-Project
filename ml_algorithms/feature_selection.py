@@ -63,6 +63,9 @@ def feature_selection(df):
     y_pred = clf.predict(X_test)
     print("Accuracy of Multiple Layer Perceptron", accuracy_score(y_test, y_pred))
 
+    # k-NN with k = 1...10
+    
+
 
 if __name__ == "__main__":
     data = pd.read_csv('C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)

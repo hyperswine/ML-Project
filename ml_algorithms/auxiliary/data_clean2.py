@@ -163,8 +163,6 @@ def extract_screen_in(df):
     df['scn_bdy_ratio'] = results1
     df['screen_size'] = results2
 
-    print(df['scn_bdy_ratio'], df['screen_size'])
-
     return df.drop(['display_size'], axis=1)
 
 
@@ -392,7 +390,6 @@ def clean_data(df):
     # Impute missing data & remove outliers
     df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
     df_ret.set_index('key_index')
-    print(df_ret.index)
 
     # Return final dataframe containing cleaned & filled data
     return df_ret

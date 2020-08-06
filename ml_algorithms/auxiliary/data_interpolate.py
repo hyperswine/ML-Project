@@ -69,20 +69,14 @@ def fill_gaps(df):
     # Remove outliers for each column, if they are 1.5X IQR for the column.
     # df_ret = rem_outliers(df_ret)
 
-    # x = input("About to Impute, press any key to continue: ")
-
     # Impute missing data, i.e. NaN.
     df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
     df_impute.columns = df_ret.columns
     df_impute.index = df_ret.index
 
-    print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
-   
-    df_impute.to_csv('imputed_df.csv')
-    print("DF has been output to imputed_df.csv")
-
-    # TODO: Apply smoothing function (exponential, gaussian).
-    
+    # print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
+    # df_impute.to_csv('imputed_df.csv')
+    # print("DF has been output to imputed_df.csv")
 
     # TEMPORARY: drop cols
     df_ret.dropna(inplace=True)
