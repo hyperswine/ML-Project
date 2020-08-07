@@ -46,14 +46,14 @@ print(r"Decision tree score for is {}".format(accuracy_score(y_pred, y_test)))
 
 # Results is about 17.6%, which is far below satisfactory. Probably means that the tree has overfit the training data
 # Try to tune hyperparameters with Grid Search
-param_grid = {'min_samples_leaf': np.arange(2,30,2)}
+param_grid = {'min_samples_leaf': np.arange(2,30,2), 'criterion': ['gini', 'entropy']}
 grid_tree = GridSearchCV(tree.DecisionTreeClassifier(random_state=0), param_grid,cv=10,return_train_score=True)
 grid_tree.fit(X_train, y_train)
 
 estimator = grid_tree.best_estimator_
 y_pred = grid_tree.predict(X_test)
 tree_performance = accuracy_score(y_test, y_pred)
-print(r"New decision tree score for is {} (Grid search)".format(tree_performance))
+print(r"New decision tree score for is {} (Grid search should be the same as before)".format(tree_performance))
 
 # Maybe Grid Search isnt the best, try randomized search next
 grid_tree = RandomizedSearchCV(tree.DecisionTreeClassifier(random_state=0), param_grid)
@@ -62,4 +62,4 @@ grid_tree.fit(X_train, y_train)
 estimator = grid_tree.best_estimator_
 y_pred = grid_tree.predict(X_test)
 tree_performance = accuracy_score(y_test, y_pred)
-print(r"New decision tree score for is {} (Randomized Search)".format(tree_performance))
+print(r"New decision tree score for is {} (Randomized Search should be 68%)".format(tree_performance))
