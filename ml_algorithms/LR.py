@@ -9,9 +9,9 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 from auxiliary.data_clean2 import clean_data
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
-
 
 # Open Dataset
 data = pd.read_csv('dataset/GSMArena_dataset_2020.csv', index_col=0)
@@ -21,11 +21,12 @@ data.info()
 data.head()
 
 # NOTE: conflicting features 'main_camera_dual', 'comms_nfc', 'battery_charging', 'selfie_camera_video' resulting in many null cols.
-data_features = data[["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",
-                "features_sensors", "platform_os", "platform_cpu", "platform_gpu", "memory_internal",
-                "main_camera_single", "main_camera_video", "misc_price",
-                "selfie_camera_video",
-                "selfie_camera_single", "battery"]]
+data_features = data[
+    ["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",
+     "features_sensors", "platform_os", "platform_cpu", "platform_gpu", "memory_internal",
+     "main_camera_single", "main_camera_video", "misc_price",
+     "selfie_camera_video",
+     "selfie_camera_single", "battery"]]
 
 df = clean_data(data_features)
 
@@ -41,7 +42,6 @@ X = df.drop(["key_index", "misc_price"], axis=1)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, random_state=120, test_size=.3)
 
-
 lr_model = LinearRegression()
 
 # Batch-train LR
@@ -54,7 +54,8 @@ print(accuracy_score(y_test, y_pred))
 
 """
 Investigating Linear Regression in more detail.
-Now we investigate LR in more depth by learning our own models and tweaking parameters, normalizing and comparing differences.
+Now we investigate LR in more depth by learning our own models and tweaking parameters, normalizing 
+& comparing differences.
 """
 
 
@@ -84,8 +85,6 @@ class LinReg:
 
         print('Coefficient of determination: %.2f'
               % r2_score(y_test, y_pred))
-    
-
 
 
 # Train LinReg
