@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from sklearn import metrics
 import os
 
-
+# Step 1 Data Preparing
 # Read Data 
 data = pd.read_csv(os.getcwd()+'/dataset/GSMArena_dataset_2020.csv', index_col=0)
 data_features = data[all_features]
@@ -26,11 +26,6 @@ temp1 = df.values[:,1:8]
 temp2 = df.values[:,9:]
 td = np.concatenate((temp1,temp2),axis=1)
 
-# Divide Y(price) into catagories
-from sklearn.preprocessing import StandardScaler
-from feature_selection import y_classify_five, y_classify
-from sklearn.model_selection import train_test_split
-
 mX = td
 mY = df["misc_price"].astype("int").values.reshape(-1,1)
 
@@ -39,43 +34,40 @@ tempList = []
 mY = mY.reshape(-1)
 for item in mY:
     tempList.append(y_classify(item))
-    mY = tempList
+mY = tempList
 
 # Do standard scaler for data in X
 sc = StandardScaler()
 sc.fit(mX)
 mX = sc.transform(mX)
 
-#X_train_std = sc.transform(X_train)
-#X_test_std = sc.transform(X_test)
-
 # Split data into train, test
 X_train, X_test, Y_train, Y_test = train_test_split(mX, mY, test_size=.2, random_state=0)
 
-logistic_GS= LogisticRegression()
-loss = cross_val_score(logistic_GS, X_train, Y_train, cv=5, scoring='neg_log_loss')
 
+# Step 2 Logistic Regression
 penaltys = ['l1','l2']
 Cs = [1, 10, 100, 1000,10000]
-solver = ['liblinear', 'newton-cg', 'sag', 'lbfgs']
-tuned_parameters = dict(penalty = penaltys, C = Cs, solver = solver)
+solvers = ['liblinear', 'newton-cg', 'sag', 'lbfgs']
+parameters = dict(penalty = penaltys, C = Cs, solver = solvers)
 
-logistic_GS_penalty= LogisticRegression()
-grid= GridSearchCV(logistic_GS_penalty, tuned_parameters,cv=5, scoring='neg_log_loss')
+logistic_GS= LogisticRegression()
+grid= GridSearchCV(logistic_GS, parameters, scoring='neg_log_loss')
 grid.fit(X_train,Y_train)
 
 test_means = grid.cv_results_[ 'mean_test_score' ]
 #print(-np.array(test_means).reshape(5,2,4))
 
-def autolabel6(rects):
-    for rect in rects:
-        height = rect.get_height()
-        plt.text(rect.get_x()+rect.get_width()/2.-0.25, height+0.001, '%0.6s' % float(height))
 
-def autolabel4(rects):
+# Step3 plot graphs
+def auto_label(rects, decimal=6):
     for rect in rects:
+        width = rect.get_x()+rect.get_width()/2.-0.25
         height = rect.get_height()
-        plt.text(rect.get_x()+rect.get_width()/2.-0.25, height+0.001, '%0.4s' % float(height))
+        if(decimal==6):
+            plt.text(width, height + 0.001, '%0.6s' % float(height))
+        elif(decimal==4):
+            plt.text(width, height + 0.001, '%0.4s' % float(height))
 
 def getAxis():
     width = 5
@@ -99,10 +91,9 @@ plt.xlabel('Cs')
 plt.ylabel('Accuracy')
 plt.ylim((0.72, 0.76))
 plt.legend(loc = 'lower left')
-autolabel6(a)
+auto_label(a,decimal=6)
 #plt.show()
 plt.savefig('l1.png')
-
 
 # penalty = l2
 plt.figure(1)
@@ -124,10 +115,17 @@ plt.title('penalty=\'l2\'')
 plt.xlabel('Cs')
 plt.ylabel('Accuracy')
 plt.ylim((0.72, 0.78))
-autolabel4(a)
-autolabel4(b)
-autolabel6(c)
-autolabel4(d)
+auto_label(a,decimal=4)
+auto_label(b,decimal=4)
+auto_label(c,decimal=6)
+auto_label(d,decimal=4)
 plt.legend(loc = 'lower left')
 #plt.show()
 plt.savefig('l2.png')
+
+# test the chosen parameters
+logistic = LogisticRegression(penalty='l2', C = 10000, solver='sag')
+logistic.fit(X_train,Y_train)
+logistz = logistic.predict(X_test)
+#print(set(logistz))
+print("Accuracy for Logistic Regression is:", str(metrics.accuracy_score(logistz, Y_test)))
