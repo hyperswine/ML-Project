@@ -13,8 +13,9 @@ from sklearn import preprocessing
 from sklearn import utils
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-# from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.tree import DecisionTreeClassifier, plot_tree
 from feature_selection import y_classify_five, y_classify
+import matplotlib.pyplot as plt
 
 # Load up dataset 1: gsmarena
 data = pd.read_csv('dataset/GSMArena_dataset_2020.csv', index_col=0)
@@ -63,3 +64,7 @@ estimator = grid_tree.best_estimator_
 y_pred = grid_tree.predict(X_test)
 tree_performance = accuracy_score(y_test, y_pred)
 print(r"New decision tree score for is {} (Randomized Search should be 68%)".format(tree_performance))
+
+fig, ax = plt.subplots(figsize=(50, 24))
+plot_tree(grid_tree.best_estimator_, fontsize=6)
+plt.savefig('_tree_high_dpi.jpg', dpi=100)
