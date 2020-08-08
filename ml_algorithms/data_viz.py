@@ -46,12 +46,12 @@ df['misc_price'] = y.apply(y_classify)
 # sns.pairplot(df, hue="misc_price",vars=["platform_cpu", "platform_gpu", "display_size"])
 
 
-col1 = ["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",
-                "features_sensors",  "misc_price"]
-col2 = [ "memory_internal",
-                "main_camera_single", "main_camera_video", "misc_price",
-                "selfie_camera_video",
-                "selfie_camera_single", "battery", "platform_os", "platform_cpu"]
+col1 = ['key_index', 'oem', 'launch_announced', 'body_dimensions',
+       'features_sensors', 'platform_gpu', 'main_camera_single',
+       'main_camera_video', 'misc_price']
+col2 = ['misc_price', 'selfie_camera_video',
+       'selfie_camera_single', 'battery', 'clock_speed', 'screen_size',
+       'scn_bdy_ratio', 'rom', 'ram']
 fig, axes = plt.subplots(4,2,sharex=False,sharey=False, figsize=(10, 9))
 bp_dict = pd.DataFrame(df, columns=col1).boxplot(
 by="misc_price", ax=axes, 
