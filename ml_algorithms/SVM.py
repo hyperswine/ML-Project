@@ -18,7 +18,6 @@ data_features = data[
 # Clean up the data into a trainable form.
 df = clean_data(data_features)
 
-
 # Learning the SVM
 def y_classify_five(y):
     if y > 1000:
@@ -32,7 +31,6 @@ def y_classify_five(y):
 
     return 0
 
-
 def y_classify(y):
     if y > 700:
         return 2
@@ -40,7 +38,6 @@ def y_classify(y):
         return 1
 
     return 0
-
 
 # Now its time to split the data
 from sklearn.model_selection import train_test_split
@@ -54,26 +51,38 @@ X_train, X_test, y_train, y_test = train_test_split(X, y3, random_state=120, tes
 y5 = y.apply(y_classify_five)
 X_train5, X_test5, y_train5, y_test5 = train_test_split(X, y5, random_state=120, test_size=.3)
 
-from sklearn.svm import SVC
+"""
+Prelininary investigation into SVM performance. Here, we establish a baseline for how well an SVM should perform 
+in practice.
+"""
+
+from sklearn.svm import SVC, SVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, plot_roc_curve
 
+# NOTE: default radial basis kernel
 svm_clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
 svm_clf.fit(X_train, y_train)
 
 y_pred = svm_clf.predict(X_test)
 print("3 class accuracy: ", accuracy_score(y_test, y_pred))
+# plot_roc_curve(svm_clf, X_test, y_test) - Unfortunately only works for binary pipelines
 
 svm_clf.fit(X_train5, y_train5)
 
 y_pred5 = svm_clf.predict(X_test5)
 print("5 class accuracy: ", accuracy_score(y_test5, y_pred5))
 
+svr_clf = make_pipeline(StandardScaler(), SVR(C=1.0, epsilon=.2))
+svr_clf.fit(X_train, y_train)
+print("Support Vector Regression score: ", svr_clf.score(X_test, y_test))
 
-# Analyzing the model and results
-# matplotlib
 
+"""
+It appears that 3-class classification would work the best. Accurate regression seems unlikely.
+Hence, in the next stage we will build our own multiclass SVM classifier & utilize various nonlinear kernels.
+"""
 
 class HyperSVM:
     """
@@ -163,8 +172,8 @@ class SvmMod:
         Expect - dataframe of two feature columns.
         """
         # NOTE: y is +/-1
-        # a* = argmax<1..n>(-1/2 * sum<i=1..n>( sum<j=1..n>( a[i]*a[j]*y[i]*y[j]*(X[i].dot(X[j]) )) + sum<i=1..n>(a[i]))
-
+# a* = argmax<1..n>(-1/2 * sum<i=1..n>( sum<j=1..n>( a[i]*a[j]*y[i]*y[j]*(X[i].dot(X[j]) )) + sum<i=1..n>(a[i]))
+        a_star = np.argmax([])
 
 
     def predict(self, X):

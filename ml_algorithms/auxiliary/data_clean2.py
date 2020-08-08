@@ -1,7 +1,7 @@
 """
 A revised version of data clean. Now the script itself is cleaner & less problematic to maintain.
-This script should drop examples (rows) with outliers, i.e. 1.5X IQR.
-It should then impute all the columns such we maintain most of the examples.
+This script should call the data_interpolate module for further data processing & return a processed dataframe
+if clean_data() was called.
 """
 import re
 import pandas as pd
@@ -11,8 +11,6 @@ from sklearn.preprocessing import LabelEncoder
 import math
 
 from .data_interpolate import *
-
-# TODO: Other features like 'body_weight' and 'body_sim' could be included.
 
 
 def extract_straight(df):
@@ -90,7 +88,6 @@ def sensor(string):
     return len([sensor for sensor in sensors if (sensor in string.lower())])
 
 
-# TODO: fix this. This should check whether '4K' or '2K' appear first before '1080p' etc.
 # Return the value '1080', '2160' if found, with no 'p'
 def cam_vid(string):
     if not string or type(string)==float:
@@ -235,7 +232,6 @@ def get_rom(string):
     string = string.replace(" ", "")
 
     if "ROM" in string:
-        # TODO: error - > "nothing to repeat at position 14?"
         x = re.search(r'\d+(G|M)B(?=ROM)', string)
         if x:
             x = x.group(0)

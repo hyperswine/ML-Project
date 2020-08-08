@@ -42,8 +42,9 @@ def feature_selection(df):
     y = df["misc_price"]
     # NOTE: 3 classes default. Switch this to 'y_classify+_five' for 5 classes.
     # 3 classes seems to result in a higher performance with both classifiers
+    y5 = y.apply(y_classify_five)
     y = y.apply(y_classify)
-    X = df.drop(["key_index", "misc_price"], axis=1)
+    X = df.drop(["key_index", "misc_price", "rom", "selfie_camera_video"], axis=1)
     rand_forest = RandomForestClassifier(n_estimators=500, n_jobs=-1)
 
     rand_forest.fit(X, y)
@@ -53,6 +54,7 @@ def feature_selection(df):
 
     # use the random forest to predict
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=120, test_size=.3)
+    X_train5, X_test5, y_train5, y_test5 = train_test_split(X, y5, random_state=120, test_size=.3)
 
     rand_forest.fit(X_train, y_train)
     y_pred = rand_forest.predict(X_test)
@@ -61,9 +63,9 @@ def feature_selection(df):
     # use a neural net to classify
     clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(15,), random_state=1)
 
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    print("Accuracy of Multiple Layer Perceptron", accuracy_score(y_test, y_pred))
+    clf.fit(X_train5, y_train5)
+    y_pred5 = clf.predict(X_test5)
+    print("Accuracy of Multiple Layer Perceptron", accuracy_score(y_test5, y_pred5))
 
     # k-NN with k = 1...10
     for i in range(1, 11):

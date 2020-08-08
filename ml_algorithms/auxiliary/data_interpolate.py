@@ -7,7 +7,6 @@ from sklearn.impute import SimpleImputer, IterativeImputer
 import numpy as np
 import pandas as pd
 
-
 # Features
 
 # straight features are straightforward to extract with \d+
@@ -15,7 +14,8 @@ import pandas as pd
 # NOTE 2: should still check if its actually 'mAH' and remove or convert if not
 straight_features = ["battery"]
 
-all_features = ["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",
+all_features = ["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan",
+                "comms_usb",
                 "features_sensors", "platform_os", "platform_cpu", "platform_gpu", "memory_internal",
                 "main_camera_single", "main_camera_video", "misc_price",
                 "selfie_camera_video",
@@ -34,7 +34,12 @@ numeric_features = ["body_dimensions", "screen_size", "scn_bdy_ratio", "clock_sp
                     "main_camera_single", "main_camera_video", "misc_price",
                     "selfie_camera_video",
                     "selfie_camera_single", "battery"]
-# TODO: there are some categorical features like 'main_camera_features' & etc. These features should also be included.
+
+
+# TODO: there are some categorical features like 'main_camera_features' & etc,
+#  someone should include these features.
+#  Other features like 'body_weight' and 'body_sim' could be also included.
+
 
 def rem_outliers(df):
     for feature in numeric_features:
@@ -42,13 +47,13 @@ def rem_outliers(df):
         # Calc IQR for the column
         Q1 = np.quantile(series_, .75)
         Q3 = np.quantile(series_, .25)
-        out_factor = 1.5*(Q3-Q1)
+        out_factor = 1.5 * (Q3 - Q1)
         out_cond = lambda x: x and (x >= Q1 - out_factor or x <= Q3 - out_factor)
 
         # Check if each value is > 1.5 * IQR
         # NOTE: does not work if a lot of examples were not properly recorded/extracted
         df[feature] = series_.apply(lambda x: x if out_cond(x) else np.nan)
-        
+
     # Return outlier free data, at the cost of potentially many missing examples.
     print(df.shape[0], df.shape[1])
     return df
@@ -67,18 +72,30 @@ def fill_gaps(df):
         df_ret[feature] = pd.to_numeric(df_ret[feature], downcast='float')
 
     # Remove outliers for each column, if they are 1.5X IQR for the column.
+    # NOTE: apparently too many outliers -> perhaps data still not in correct form or data inconsistently sampled?
     # df_ret = rem_outliers(df_ret)
 
-    # Impute missing data, i.e. NaN.
-    df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
-    df_impute.columns = df_ret.columns
-    df_impute.index = df_ret.index
+    # (A) Imputing
+    # df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
+    # df_impute.columns = df_ret.columns
+    # df_impute.index = df_ret.index
 
     # print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
     # df_impute.to_csv('imputed_df.csv')
     # print("DF has been output to imputed_df.csv")
 
-    # TEMPORARY: drop cols
+    # (B) Interpolation
+    for feature in final_features:
+        # forward interpolate linearly
+        df_ret[feature].interpolate(method='linear', inplace=True)
+
+        # forward interpolate cubic spline
+        # df_ret[feature].interpolate(method='cubicspline', inplace=True)
+
+        # central differentiation approximation
+        # df_ret[feature].interpolate(method='from_derivatives', inplace=True)
+
+    # Drop null cols
     df_ret.dropna(inplace=True)
 
     # Reindex the data

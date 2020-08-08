@@ -6,7 +6,7 @@ In feature_selection.py, a random forest classifier from sklearn is used as a ga
 for random samples & random features. From the results, it appears that features such as the devices 'oem', date of release, dimensions, sensors, screen-body ratio, 
 clock speed.
 
-Features that didn't seem as necessary included the device's 'launch status', communication protocols, cpu core count, the resolution of the selfie camera.
+Features that didn't seem as necessary included the device's 'launch status', communication protocols, cpu core count, ROM size, the resolution & video quality of the selfie camera.
 
 #### Performance of sklearn's algorithms
 
