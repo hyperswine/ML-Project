@@ -1,6 +1,15 @@
-# Predicting the value of Mobile devices from their specifications
+## Predicting the value of Mobile devices from their specifications
 
-## Preliminary Feature Selection
+#### How to run the scripts
+The 'GSMArena_dataset_2020' is around 10MB which may be too large for 'give'. Hence to run the scripts, one must download
+the dataset from our team's [onedrive folder](https://unsw-my.sharepoint.com/:f:/g/personal/z5258237_ad_unsw_edu_au/EmcRr_EP6KRJlDrbOFre6ZQBBrJpezdJXhIAb0guwC7Pgw?e=lyzaRz).
+NOTE: this assumes you are using a UNSW account to access onedrive.
+
+Then, simply put all the scripts in a directory, e.g. `scripts` and the `GSMArena_dataset_2020.csv` in \scripts\dataset.
+The `\auxiliary` subdir should also be in there.
+The scripts feature_selection, LR, DecisionTree, etc. should run without fail if these steps are met.
+
+### Preliminary Feature Selection
 
 In feature_selection.py, a random forest classifier from sklearn is used as a gauge of the expressiveness of each feature
 for random samples & random features. From the results, it appears that features such as the devices 'oem', date of release, dimensions, sensors, screen-body ratio, 
@@ -16,7 +25,7 @@ The question now is: What really is the relationship between a mobile device's t
 
 The next sections cover our investigation into a variety of machine learning algorithms that try and model this relationship as well as possible.
 
-## Linear Regression
+### Linear Regression
 
 It made sense that the one of the first machine learning concept to apply would a regressor that to test if the features were linearly related to the price.
 
