@@ -12,7 +12,8 @@ from sklearn.metrics import accuracy_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import time
+from threading import Thread
 
 def y_classify(y):
     if y > 700:
@@ -36,7 +37,7 @@ def y_classify_five(y):
     return 0
 
 
-def feature_selection(df):
+def feature_selection(df, expressiveness='F'):
     """
     Output the features that are the most important in the feature dataframe
     """
@@ -50,8 +51,9 @@ def feature_selection(df):
 
     rand_forest.fit(X, y)
 
-    for feature, score in zip(X, rand_forest.feature_importances_):
-        print(feature, score)
+    if expressiveness != 'P':
+        for feature, score in zip(X, rand_forest.feature_importances_):
+            print(feature, score)
 
     # use the random forest to predict
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=120, test_size=.3)
@@ -129,5 +131,12 @@ if __name__ == "__main__":
          "selfie_camera_single", "battery"]]
 
     df = clean_data(data_features)
-    feature_selection(df)
+
+    expressiveness = ""
+
+    expressiveness = input("Turn off expressiveness? y/n : ")
+    if expressiveness.lower()=='y':
+        expressiveness = 'P'
+
+    feature_selection(df, expressiveness)
     # plot_pairs(df) # creates quite a lot of plots (a few hundred) in /plots

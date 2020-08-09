@@ -20,8 +20,8 @@ from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
 data = pd.read_csv('dataset/GSMArena_dataset_2020.csv', index_col=0)
 
 # Some Insight
-data.info()
-data.head()
+# data.info()
+# data.head()
 
 # NOTE: conflicting features 'main_camera_dual', 'comms_nfc', 'battery_charging', 'selfie_camera_video' resulting in
 # many null cols.

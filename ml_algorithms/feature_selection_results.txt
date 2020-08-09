@@ -1,0 +1,32 @@
+Dimensions of dataframe 5574x17
+
+oem 0.11370063126640384
+launch_announced 0.08137031824933236
+body_dimensions 0.10101751650426191
+features_sensors 0.04655769699908168
+platform_gpu 0.02107362598015219
+main_camera_single 0.028659729999882904
+main_camera_video 0.05604794030122696
+selfie_camera_single 0.03958635030334512
+battery 0.09470817381886039
+clock_speed 0.15034575191605606
+screen_size 0.07916898670456478
+scn_bdy_ratio 0.11492667860658999
+ram 0.07283659935024187
+
+Accuracy of RF classifier 0.8517632994620442
+Accuracy of Multiple Layer Perceptron (Categorical Only) 0.38613269575612674
+Accuracy of Multiple Layer Perceptron (Numeric In) 0.7005379557680813
+Accuracy of NN with k = 1 0.7334130304841602
+Accuracy of NN with k = 2 0.7346084877465631
+Accuracy of NN with k = 3 0.7405857740585774
+Accuracy of NN with k = 4 0.7471607890017932
+Accuracy of NN with k = 5 0.7603108188882247
+Accuracy of NN with k = 6 0.7638971906754334
+Accuracy of NN with k = 7 0.7627017334130305
+Accuracy of NN with k = 8 0.766288105200239
+Accuracy of NN with k = 9 0.7644949193066348
+Accuracy of NN with k = 10 0.7638971906754334
+Accuracy of Gassian Naive Bayes @ default settings 0.5977286312014346
+Accuracy of Multinomial NB @ alpha = 1 (laplace) 0.5260011954572624
+Accuracy of Complement NB @ alpha = 1 (laplace) 0.6102809324566647
