@@ -42,10 +42,10 @@ y = y.apply(y_classify)
 # Split data into train, test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.4, random_state=0)
 
-# logReg = LogisticRegression()
-# logReg = logReg.fit(X_train, y_train)
-# y_pred = logReg.predict(X_test)
-# print(r"Logistic Regression score for is {}".format(accuracy_score(y_pred, y_test)))
+logReg = LogisticRegression()
+logReg = logReg.fit(X_train, y_train)
+y_pred = logReg.predict(X_test)
+print(r"Logistic Regression score for is {}".format(accuracy_score(y_pred, y_test)))
 
 
 #%%
@@ -83,9 +83,8 @@ def oneVsA(X, y, num_labels, LRlambda):
         initial_theta = np.zeros([n+1,1])
         args = ( X, (y == c), LRlambda)
         opts = {'maxiter': None, 'disp': True}
-        # result = optimize.fmin_cg(costFunction, initial_theta, fprime=gradFunction, args = args)
         result = optimize.minimize(costFunction, initial_theta, jac=gradFunction, args=args,  method = 'Nelder-Mead', options=opts) 
-        all_theta[c,:] = result
+        all_theta[c,:] = result.x
     return all_theta
 
 def findmax(l):
@@ -96,7 +95,6 @@ def findmax(l):
 def predictOneVsA(all_theta, X):
     m = np.shape(X)[0]
     num_labels = np.shape(all_theta)[0]
-    # p = np.zeros([np.shape(X)[1],1])
     #add ones to beginning
     X = np.concatenate((np.ones([m,1]), X.to_numpy()), axis=1)
     A = np.dot(X,all_theta.T);
@@ -108,12 +106,4 @@ num_labels = 3; #or 5
 all_theta = oneVsA(X, y, num_labels, regularization);
 y_pred = predictOneVsA(all_theta, X_test);
 accuracy = np.mean((y_pred == y_test))
-
-theta_t = np.array([-2, -1, 1, 2]).T
-X_t = np.concatenate((np.ones([5,1]), np.reshape(np.arange(1,16),[3,5]).T/10), axis=1)
-y_t = np.array([1,0,1,0,1]).T #([1;0;1;0;1] >= 0.5);
-lambda_t = 3;
-J = costFunction(theta_t, X_t, y_t, lambda_t)
-grad = gradFunction(theta_t, X_t, y_t, lambda_t)
-print(r'\nCost: {}\n'.format( J));
-print(r'Grad: {}'.format(grad))
+print(r'Accuracy of Custom One vs All Logistic Regression is {}'.format(accuracy))
