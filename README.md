@@ -80,3 +80,10 @@ Refer to [knn_Bayes.py](ml_algorithms/knn_Bayes.py)
 
 This contains scripts for simple kNN with k=1..11 & Naive-Bayes performance measures. Most other algorithms should be 
 able to beat these baselines.
+
+#### Nerual Learning
+
+Refer to [NeuralLearning.py](ml_algorithms/NeuralLearning.py)
+
+This contains a custom neural network class that operates on the gsm dataset. Uses sigmoid activation & 1,000 neurons
+by default.
