@@ -10,11 +10,12 @@ The `\auxiliary` subdir should also be in there.
 The scripts feature_selection, LR, DecisionTree, etc. should run without fail if these steps are met.
 
 #### Options
-You may wish to specify the interpolation or imputing with options 'A' & 'B' in clean_data(). The default option is 'B',
+It is possible to specify the interpolation or imputing with options 'A' & 'B' in clean_data(). The default option is 'B',
 which does linear interpolation for columns with fewer than 5000 null values. One may also uncomment cubic or derivative
 interpolation instead of linear. 
 
-In feature_selection.py, one may specify 'F' or 'P' for full or partial output of feature expressiveness.
+In feature_selection.py, one may specify 'F' or 'P' for full or partial output of feature expressiveness. Note: the 
+default option is full output.
 
 #### Preliminary Feature Selection, 
 
