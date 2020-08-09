@@ -1,20 +1,17 @@
-Dimensions of dataframe 5574x17
-
-oem 0.11370063126640384
-launch_announced 0.08137031824933236
-body_dimensions 0.10101751650426191
-features_sensors 0.04655769699908168
-platform_gpu 0.02107362598015219
-main_camera_single 0.028659729999882904
-main_camera_video 0.05604794030122696
-selfie_camera_single 0.03958635030334512
-battery 0.09470817381886039
-clock_speed 0.15034575191605606
-screen_size 0.07916898670456478
-scn_bdy_ratio 0.11492667860658999
-ram 0.07283659935024187
-
-Accuracy of RF classifier 0.8517632994620442
+Turn off expressiveness? y/n : oem 0.11417680183348902
+launch_announced 0.08065464842047147
+body_dimensions 0.10093057024951445
+features_sensors 0.0441792455074068
+platform_gpu 0.021010744957165862
+main_camera_single 0.028689513513573784
+main_camera_video 0.058222930046643355
+selfie_camera_single 0.03984118238691419
+battery 0.09434038679709923
+clock_speed 0.14625102444384225
+screen_size 0.07870116097631119
+scn_bdy_ratio 0.1171639961746086
+ram 0.07583779469295987
+Accuracy of RF classifier 0.8529587567244471
 Accuracy of Multiple Layer Perceptron (Categorical Only) 0.38613269575612674
 Accuracy of Multiple Layer Perceptron (Numeric In) 0.7005379557680813
 Accuracy of NN with k = 1 0.7334130304841602

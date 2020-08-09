@@ -58,8 +58,9 @@ lr_model.fit(X_train, y_train)
 # Test the model & retrieve predictions
 y_pred = lr_model.predict(X_test)
 
-print("r2 score (Linear): ", r2_score(y_test, y_pred))
+print("r2 score: ", r2_score(y_test, y_pred))
 print("MSE: ", mean_squared_error(y_test, y_pred))
+print("\n")
 
 # Test categorical data only
 X = X.drop(["body_dimensions", "screen_size", "scn_bdy_ratio", "clock_speed", "battery"], axis=1)
@@ -70,8 +71,9 @@ X_trainC, X_testC, y_trainC, y_testC = train_test_split(
 
 lr_model.fit(X_trainC, y_trainC)
 y_predC = lr_model.predict(X_testC)
-print("r2 score (Linear C): ", r2_score(y_testC, y_predC))
-print("MSE (C): ", mean_squared_error(y_testC, y_predC))
+print("r2 score (Categorical Input): ", r2_score(y_testC, y_predC))
+print("MSE (Categorical Input): ", mean_squared_error(y_testC, y_predC))
+print("\n")
 
 """
 Investigating Linear Regression in more detail.

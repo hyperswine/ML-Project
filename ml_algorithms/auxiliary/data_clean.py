@@ -298,7 +298,7 @@ if __name__ == '__main__':
 
     print("opening dataset...")
     # Open Dataset
-    data = pd.read_csv('../dataset/GSMArena_dataset_2020.csv', index_col=0)
+    data = pd.read_csv('dataset/GSMArena_dataset_2020.csv', index_col=0)
 
     data_features = data[
         ["launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",

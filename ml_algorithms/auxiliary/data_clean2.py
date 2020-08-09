@@ -396,7 +396,7 @@ if __name__ == '__main__':
     # Open Dataset
     # NOTE: change the path to your own path.
     data = pd.read_csv(
-        'C:/Users/capta/Desktop/9417-Great-Group/ml_algorithms/dataset/GSMArena_dataset_2020.csv', index_col=0)
+        'dataset/GSMArena_dataset_2020.csv', index_col=0)
 
     # Extract relevant features (for now)
     data_features = data[all_features]

@@ -46,6 +46,19 @@ def feature_selection(df, expressiveness='F'):
     # 3 classes seems to result in a higher performance with both classifiers
     y5 = y.apply(y_classify_five)
     y = y.apply(y_classify)
+
+    # plot numbers of class labels
+    if expressiveness != 'P':
+        print("Number of Labels for 3-class\n\tLabel\tNumber")
+        for i in range(3):
+            print(f"\t{i}\t{np.sum(y.apply(lambda x: x==i))}")
+
+        print("Number of Labels for 5-class\n\tLabel\tNumber")
+        for i in range(5):
+            print(f"\t{i}\t{np.sum(y5.apply(lambda x: x == i))}")
+    if expressiveness != 'P':
+        y.to_csv('output_csv')
+
     X = df.drop(["key_index", "misc_price", "rom", "selfie_camera_video"], axis=1)
     rand_forest = RandomForestClassifier(n_estimators=500, n_jobs=-1)
 
@@ -133,10 +146,10 @@ if __name__ == "__main__":
     df = clean_data(data_features)
 
     expressiveness = ""
-
-    expressiveness = input("Turn off expressiveness? y/n : ")
-    if expressiveness.lower()=='y':
-        expressiveness = 'P'
+    #
+    # expressiveness = input("Turn off expressiveness? y/n : ")
+    # if expressiveness.lower() == 'y':
+    #     expressiveness = 'P'
 
     feature_selection(df, expressiveness)
     # plot_pairs(df) # creates quite a lot of plots (a few hundred) in /plots
