@@ -37,14 +37,6 @@ features = ["oem", "launch_announced",  "body_dimensions", "features_sensors",  
 
 
 
-sns.set_style("whitegrid")
-sns.boxplot(x=y) #Box plot
-plt.show()
-
-# for i in range(len(features)-1):
-#     sns.regplot(x=features[i],y=y,data=X)
-#     plt.show()
-
 
 y = y.apply(y_classify)
 
@@ -60,11 +52,8 @@ f, ax = plt.subplots(figsize=(11, 9))
 cmap = sns.diverging_palette(220, 10, as_cmap=True)
 # Draw the heatmap with the mask and correct aspect ratio
 sns.heatmap(corr, mask=mask, cmap=cmap, vmax=.5, center=0,
-            square=True, linewidths=.5, cbar_kws={"shrink": .5})
+            square=True, linewidths=.5, cbar_kws={"shrink": .5},annot = True)
 plt.show()
-
-
-
 
 
 
@@ -72,7 +61,7 @@ plt.show()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.3, random_state=0)
 
 '''
-TO DO: To reduce dimensions, select one to three attributes that have the most impact. Use correlation heatmap to find out
+Choose all features
 '''
 
 
@@ -83,14 +72,38 @@ grid_knn.fit(X_train, y_train)
 estimator = grid_knn.best_estimator_
 y_pred = grid_knn.predict(X_test)
 result = accuracy_score(y_test, y_pred)
-print('the best result is: ',result,' and the param is:\n',grid_knn.best_params_)
+print('the best result using all features is : ',result,' and the param is:\n',grid_knn.best_params_)
 
-# for i in range(1, 11):
-#     clf = KNeighborsClassifier(n_neighbors=i, weights='distance')
-#     clf.fit(X_train, y_train)
-#     y_pred = clf.predict(X_test)
-#     print('\n- - - k = ',i)
-#     print(classification_report(y_test, y_pred))
-#     print('precise accuracy = ',accuracy_score(y_pred, y_test))
 
-#plot data 
+
+'''
+Select the top n features of correlation
+'''
+sorted_top_n_features =["ram","clock_speed","features_sensors", "scn_bdy_ratio","oem"]
+top_n_features = dict()
+
+#we select top 5 features
+i = 5
+param_grid = {'n_neighbors': np.arange(1,11), 'weights': ['uniform', 'distance'],'algorithm' : ['auto','ball_tree', 'kd_tree','brute']}
+grid_knn = GridSearchCV(KNeighborsClassifier(), param_grid, cv=10, return_train_score=True)
+grid_knn.fit(X_train[sorted_top_n_features[:i+1]], y_train)
+
+estimator = grid_knn.best_estimator_
+y_pred = grid_knn.predict(X_test[sorted_top_n_features[:i+1]])
+result = accuracy_score(y_test, y_pred)
+top_n_features[i] = (result,grid_knn.best_params_)
+
+print('the best result using top',i+1,'features (',sorted_top_n_features[:i+1] ,') is : ',result,' and the param is:\n',grid_knn.best_params_)
+
+# for i in range(len(sorted_top_n_features)):
+    
+#     param_grid = {'n_neighbors': np.arange(1,11), 'weights': ['uniform', 'distance'],'algorithm' : ['auto','ball_tree', 'kd_tree','brute']}
+#     grid_knn = GridSearchCV(KNeighborsClassifier(), param_grid, cv=10, return_train_score=True)
+#     grid_knn.fit(X_train[sorted_top_n_features[:i+1]], y_train)
+    
+#     estimator = grid_knn.best_estimator_
+#     y_pred = grid_knn.predict(X_test[sorted_top_n_features[:i+1]])
+#     result = accuracy_score(y_test, y_pred)
+#     top_n_features[i] = (result,grid_knn.best_params_)
+    
+#     print('the best result using top',i+1,'features (',sorted_top_n_features[:i+1] ,') is : ',result,' and the param is:\n',grid_knn.best_params_)

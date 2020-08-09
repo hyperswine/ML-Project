@@ -30,6 +30,10 @@ X = df.drop(["key_index", "misc_price"], axis=1)
 lab_enc = preprocessing.LabelEncoder()
 # y = lab_enc.fit_transform(y)
 
+sns.set_style("whitegrid")
+sns.boxplot(x=y) #Box plot
+plt.show()
+
 y = y.apply(y_classify)#e.g. y > 700: return 2; 700 >= y >= 300: return 1; y < 300: return 0
 
 
