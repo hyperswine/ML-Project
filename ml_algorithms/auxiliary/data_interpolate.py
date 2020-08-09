@@ -36,7 +36,7 @@ numeric_features = ["body_dimensions", "screen_size", "scn_bdy_ratio", "clock_sp
                     "selfie_camera_single", "battery"]
 
 
-# TODO: there are some categorical features like 'main_camera_features' & etc,
+# There are some categorical features like 'main_camera_features' & etc,
 #  someone should include these features.
 #  Other features like 'body_weight' and 'body_sim' could be also included.
 
@@ -59,7 +59,7 @@ def rem_outliers(df):
     return df
 
 
-def fill_gaps(df):
+def fill_gaps(df, option):
     # NOTE: Can also use some interpolation (linear, cubic) instead.
     i_imp = IterativeImputer(max_iter=20, random_state=6)
     s_imp = SimpleImputer(missing_values=np.nan, strategy='mean')
@@ -75,39 +75,42 @@ def fill_gaps(df):
     # NOTE: apparently too many outliers -> perhaps data still not in correct form or data inconsistently sampled?
     # df_ret = rem_outliers(df_ret)
 
-    # (A) Imputing
-    # df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
-    # df_impute.columns = df_ret.columns
-    # df_impute.index = df_ret.index
+    if option == 'A':
+        # (A) Imputing
+        df_impute = pd.DataFrame(s_imp.fit_transform(df_ret))
+        df_impute.columns = df_ret.columns
+        df_impute.index = df_ret.index
 
-    # print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
-    # df_impute.to_csv('imputed_df.csv')
-    # print("DF has been output to imputed_df.csv")
+        # print("Dimensions of imputed df", df_impute.shape[0], df_impute.shape[1])
+        # df_impute.to_csv('imputed_df.csv')
+        # print("DF has been output to imputed_df.csv")
 
     # (B) Interpolation
-    for feature in final_features:
-        # forward interpolate linearly -> 87% on RF
-        n_missing = df_ret[feature].isnull().sum()
-        # if n missing values > 5000, skip. NOTE: make this 4000.
-        # TODO: only fill small gaps instead. I.e. do not fill gaps of over 4 indices (mask).
-        if n_missing > 5000:
-            continue
+    if option == 'B':
+        for feature in final_features:
+            # forward interpolate linearly -> 87% on RF
+            n_missing = df_ret[feature].isnull().sum()
+            # if n missing values > 5000, skip. NOTE: make this 4000.
+            # Someone change this to only fill small gaps instead. I.e. do not fill gaps of over 4 indices (mask).
+            if n_missing > 5000:
+                continue
 
-        # print(f"df[{feature}] contains {n_missing} missing values")
-        df_ret[feature].interpolate(method='linear', inplace=True)
+            # print(f"df[{feature}] contains {n_missing} missing values")
+            df_ret[feature].interpolate(method='linear', inplace=True)
 
-        # forward interpolate cubic spline -> 85% on RF
-        # df_ret[feature].interpolate(method='cubicspline', inplace=True)
+            # forward interpolate cubic spline -> 85% on RF
+            # df_ret[feature].interpolate(method='cubicspline', inplace=True)
 
-        # central differentiation approximation -> 87% on RF
-        # df_ret[feature].interpolate(method='from_derivatives', inplace=True)
+            # central differentiation approximation -> 87% on RF
+            # df_ret[feature].interpolate(method='from_derivatives', inplace=True)
 
+    # (C) Simply drop null cols. Result = 700~800 examples.
     # Drop null cols
     df_ret.dropna(inplace=True)
 
     # Reindex the data
     df_ret.reset_index(inplace=True)
 
-    print("Dimensions of dataframe", str(df_ret.shape[0]) + "x" + str(df_ret.shape[1]))
+    # print("Dimensions of dataframe", str(df_ret.shape[0]) + "x" + str(df_ret.shape[1]))
 
     return df_ret

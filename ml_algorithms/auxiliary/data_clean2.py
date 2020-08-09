@@ -357,7 +357,7 @@ f_map = {"launch_announced": launch_announced,
          }
 
 
-def clean_data(df):
+def clean_data(df, option='B'):
 
     df_ret = pd.DataFrame()
 
@@ -384,7 +384,7 @@ def clean_data(df):
     # x = input("Extraction over. Continue to imputing & null drop phase? [Any Key to Continue]: ")
 
     # Impute missing data & remove outliers
-    df_ret = fill_gaps(df.drop(cols_to_drop, axis=1))
+    df_ret = fill_gaps(df.drop(cols_to_drop, axis=1), option)
     df_ret.set_index('key_index')
 
     # Return final dataframe containing cleaned & filled data

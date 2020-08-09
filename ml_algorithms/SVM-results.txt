@@ -1,4 +1,4 @@
-SVM-3 class classification finished in 0.38161182403564453 seconds
+SVM-3 class classification finished in 0.39464545249938965 seconds
 3 class accuracy:  0.7591153616258218
 Classification Report,
                precision    recall  f1-score   support
@@ -20,7 +20,7 @@ Confusion Matrix
 ========NEXT==================================
 
 
-SVM-5 class classification finished in 0.4410712718963623 seconds
+SVM-5 class classification finished in 0.4825551509857178 seconds
 5 class accuracy:  0.6413628212791392
 Classification Report,
                precision    recall  f1-score   support
