@@ -83,7 +83,7 @@ grid_knn.fit(X_train, y_train)
 estimator = grid_knn.best_estimator_
 y_pred = grid_knn.predict(X_test)
 result = accuracy_score(y_test, y_pred)
-print('the best result is: ',result,' and the param is:\n',best_params_)
+print('the best result is: ',result,' and the param is:\n',grid_knn.best_params_)
 
 # for i in range(1, 11):
 #     clf = KNeighborsClassifier(n_neighbors=i, weights='distance')
