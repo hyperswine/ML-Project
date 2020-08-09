@@ -62,4 +62,4 @@ grid_tree.fit(X_train, y_train)
 estimator = grid_tree.best_estimator_
 y_pred = grid_tree.predict(X_test)
 tree_performance = accuracy_score(y_test, y_pred)
-print(r"New decision tree score for is {} (Randomized Search should be 68%)".format(tree_performance))
+print(r"New decision tree score for is {} (Randomized Search should be 78%)".format(tree_performance))
