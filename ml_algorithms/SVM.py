@@ -18,38 +18,24 @@ data_features = data[
 # Clean up the data into a trainable form.
 df = clean_data(data_features)
 
-# Learning the SVM
-def y_classify_five(y):
-    if y > 1000:
-        return 4
-    elif y > 700 and y <= 1000:
-        return 3
-    elif y > 450 and y <= 700:
-        return 2
-    elif y > 200 and y <= 450:
-        return 1
-
-    return 0
-
-def y_classify(y):
-    if y > 700:
-        return 2
-    elif y >= 300 and y <= 700:
-        return 1
-
-    return 0
+# Load helper functions
+from feature_selection import y_classify, y_classify_five
 
 # Now its time to split the data
 from sklearn.model_selection import train_test_split
 
 y = df["misc_price"]
-y3 = y.apply(y_classify)
 X = df.drop(["key_index", "misc_price"], axis=1)
+# one numeric variable = screen size.
+X = X.drop(["screen_size", "scn_bdy_ratio", "clock_speed", "battery"], axis=1)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y3, random_state=120, test_size=.3)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=120, test_size=.3)
 
 y5 = y.apply(y_classify_five)
-X_train5, X_test5, y_train5, y_test5 = train_test_split(X, y5, random_state=120, test_size=.3)
+X_train5, X_test5, y_train5, y_test5 = train_test_split(X, y5, random_state=100, test_size=.3)
+
+y3 = y.apply(y_classify)
+X_train3, X_test3, y_train3, y_test3 = train_test_split(X, y3, random_state=80, test_size=.3)
 
 """
 Prelininary investigation into SVM performance. Here, we establish a baseline for how well an SVM should perform 
@@ -59,14 +45,14 @@ in practice.
 from sklearn.svm import SVC, SVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, plot_roc_curve
+from sklearn.metrics import accuracy_score, plot_roc_curve, classification_report
 
 # NOTE: default radial basis kernel
 svm_clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
-svm_clf.fit(X_train, y_train)
+svm_clf.fit(X_train3, y_train3)
 
-y_pred = svm_clf.predict(X_test)
-print("3 class accuracy: ", accuracy_score(y_test, y_pred))
+y_pred3 = svm_clf.predict(X_test3)
+print("3 class accuracy: ", accuracy_score(y_test3, y_pred3))
 # plot_roc_curve(svm_clf, X_test, y_test) - Unfortunately only works for binary pipelines
 
 svm_clf.fit(X_train5, y_train5)
@@ -80,7 +66,7 @@ print("Support Vector Regression score: ", svr_clf.score(X_test, y_test))
 
 
 """
-It appears that 3-class classification would work the best. Accurate regression seems unlikely.
+It appears that 3-class classification would work the best. Accurate SV regression seems highly unlikely.
 Hence, in the next stage we will build our own multiclass SVM classifier & utilize various nonlinear kernels.
 """
 
@@ -173,7 +159,8 @@ class SvmMod:
         """
         # NOTE: y is +/-1
 # a* = argmax<1..n>(-1/2 * sum<i=1..n>( sum<j=1..n>( a[i]*a[j]*y[i]*y[j]*(X[i].dot(X[j]) )) + sum<i=1..n>(a[i]))
-        a_star = np.argmax([])
+        a_star = []
+
 
 
     def predict(self, X):

@@ -86,13 +86,20 @@ def fill_gaps(df):
 
     # (B) Interpolation
     for feature in final_features:
-        # forward interpolate linearly
+        # forward interpolate linearly -> 87% on RF
+        n_missing = df_ret[feature].isnull().sum()
+        # if n missing values > 5000, skip. NOTE: make this 4000.
+        # TODO: only fill small gaps instead. I.e. do not fill gaps of over 4 indices (mask).
+        if n_missing > 5000:
+            continue
+
+        # print(f"df[{feature}] contains {n_missing} missing values")
         df_ret[feature].interpolate(method='linear', inplace=True)
 
-        # forward interpolate cubic spline
+        # forward interpolate cubic spline -> 85% on RF
         # df_ret[feature].interpolate(method='cubicspline', inplace=True)
 
-        # central differentiation approximation
+        # central differentiation approximation -> 87% on RF
         # df_ret[feature].interpolate(method='from_derivatives', inplace=True)
 
     # Drop null cols
@@ -100,5 +107,7 @@ def fill_gaps(df):
 
     # Reindex the data
     df_ret.reset_index(inplace=True)
+
+    print("Dimensions of dataframe", str(df_ret.shape[0]) + "x" + str(df_ret.shape[1]))
 
     return df_ret

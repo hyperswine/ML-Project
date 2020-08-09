@@ -23,7 +23,8 @@ data = pd.read_csv('dataset/GSMArena_dataset_2020.csv', index_col=0)
 data.info()
 data.head()
 
-# NOTE: conflicting features 'main_camera_dual', 'comms_nfc', 'battery_charging', 'selfie_camera_video' resulting in many null cols.
+# NOTE: conflicting features 'main_camera_dual', 'comms_nfc', 'battery_charging', 'selfie_camera_video' resulting in
+# many null cols.
 data_features = data[
     ["oem", "launch_announced", "launch_status", "body_dimensions", "display_size", "comms_wlan", "comms_usb",
      "features_sensors", "platform_os", "platform_cpu", "platform_gpu", "memory_internal",
@@ -54,16 +55,29 @@ lr_model = LinearRegression()
 # Batch-train LR
 lr_model.fit(X_train, y_train)
 
-# Test the model & retreive predictions
+# Test the model & retrieve predictions
 y_pred = lr_model.predict(X_test)
 
 print("r2 score (Linear): ", r2_score(y_test, y_pred))
 print("MSE: ", mean_squared_error(y_test, y_pred))
 
+# Test categorical data only
+X = X.drop(["body_dimensions", "screen_size", "scn_bdy_ratio", "clock_speed", "battery"], axis=1)
+
+# Categorical input/ouput
+X_trainC, X_testC, y_trainC, y_testC = train_test_split(
+    X, y, random_state=120, test_size=.3)
+
+lr_model.fit(X_trainC, y_trainC)
+y_predC = lr_model.predict(X_testC)
+print("r2 score (Linear C): ", r2_score(y_testC, y_predC))
+print("MSE (C): ", mean_squared_error(y_testC, y_predC))
+
 """
 Investigating Linear Regression in more detail.
 Now we investigate LR in more depth by learning our own models and regularizing.
 """
+
 
 # Set up class & method defs for LR batch
 
@@ -103,7 +117,7 @@ class LinReg:
         n = X.shape[0]
 
         # Ref: 'Hands on Machine Learning ..' Gueron. (p 127) for general stochastic grad. descent algorithm.
-        for epoch in self.epochs:
+        for epoch in range(self.epochs):
             for i in range(n):
                 rand_index = np.random.randint(n)
                 x_i = X[rand_index:rand_index + 1]
@@ -113,7 +127,7 @@ class LinReg:
 
                 # conditional end
                 if epoch > 1 and np.linalg.norm(np.abs(self.weights - prev_weights)) < 10:
-                    break
+                    return
 
                 prev_weights = self.weights
 
@@ -126,18 +140,18 @@ class LinReg:
         prev_weights = self.weights
         n = X.shape[0]
 
-        for epoch in self.epochs:
+        for epoch in range(self.epochs):
             for i in range(n):
                 rand_index = np.random.randint(n)
                 x_i = X[rand_index:rand_index + 1]
                 y_i = y[rand_index:rand_index + 1]
                 grad = 2 * x_i.T.dot(x_i.dot(self.theta_pred) - y_i)
                 penalty = lmb * np.linalg.norm(self.theta_pred, ord=1)
-                self.weights += -self.learn_rate(epoch * n + i) * grad + penalty
+                self.weights += -self.learn_rate(epoch * n + i) * grad + [self.weights.shape[0]*[penalty]]
 
                 # conditional end
                 if epoch > 1 and np.linalg.norm(np.abs(self.weights - prev_weights)) < cond_end:
-                    break
+                    return
 
                 prev_weights = self.weights
 
@@ -155,21 +169,20 @@ class LinReg:
             prev_weights = self.weights
             n = X.shape[0]
 
-            for epoch in self.epochs:
+            for epoch in range(self.epochs):
                 for i in range(n):
                     rand_index = np.random.randint(n)
                     x_i = X[rand_index:rand_index + 1]
                     y_i = y[rand_index:rand_index + 1]
                     grad = 2 * x_i.T.dot(x_i.dot(self.weights) - y_i)
-                    penalty = lmb * (np.linalg.norm(self.weights, ord=2)**2)
-                    self.weights += -self.learn_rate(epoch * n + i) * grad + penalty
+                    penalty = lmb * (np.linalg.norm(self.weights, ord=2) ** 2)
+                    self.weights += -self.learn_rate(epoch * n + i) * grad + [self.weights.shape[0]*[penalty]]
 
                     # conditional end if |w*(i+1) - w*(i)| changes less than an arbitary value, say 10.
                     if epoch > 1 and np.linalg.norm(np.abs(self.weights - prev_weights)) < cond_end:
-                        break
+                        return
 
                     prev_weights = self.weights
-
 
     def predict_batch(self, X):
         """
@@ -200,7 +213,6 @@ class LinReg:
         plt.plot(self.theta_pred if batch else self.weights)
 
 
-
 # Train LinReg Batch
 lin_reg = LinReg(n_features=X_train.shape[1])
 
@@ -208,12 +220,13 @@ lin_reg.fit_batch(X_train, y_train)
 y_pred = lin_reg.predict_batch(X_test)
 lin_reg.performance(y_test, y_pred)
 
+
 # # Perform 4-fold cross-validation on the datasets
 # kf_4 = KFold(n_splits=4, shuffle=True)
 # kf_4.get_n_splits(X)
 
 # for train, test in kf_4.split(X):
-#     lin_reg.fit(X[train], y[train])
+#     lin_reg.fit_batch(X[train], y[train])
 #     y_pred = lin_reg.predict(X[test])
 #     print(lin_reg.performance(y[test], y_pred))
 
@@ -222,29 +235,29 @@ lin_reg.performance(y_test, y_pred)
 # kf_10.get_n_splits(X)
 
 # for train, test in kf_10.split(X):
-#     lin_reg.fit(X[train], y[train])
+#     lin_reg.fit_stochastic(X[train], y[train])
 #     y_pred = lin_reg.predict(X[test])
 #     print(lin_reg.performance(y[test], y_pred))
 
+
 # Regularize with L1:
-lin_reg.L1_fit(X_train, y_train)
-y_pred = lin_reg.predict_stochastic(X_test)
-lin_reg.performance(y_test, y_pred)
-
-# Regularize with L2
-lin_reg.L2_fit(X_train, y_train, closed_form=False)
-y_pred = lin_reg.predict_stochastic(X_test)
-lin_reg.performance(y_test, y_pred)
-
-# TODO 1: just plot the coefficients (vector), and plot each L1, L2, & batch-normal equation accuracy.
-# TODO 2: plot accuracy of L1 & L2 over epochs = 100,200,300,400,500...1000,5000.
-
-plt.plot(lin_reg.theta_pred)
-plt.plot(lin_reg.weights)
+# lin_reg.L1_fit(X_train, y_train)
+# y_pred = lin_reg.predict_stochastic(X_test)
+# lin_reg.performance(y_test, y_pred)
+#
+# # Regularize with L2
+# lin_reg.L2_fit(X_train, y_train, closed_form=False)
+# y_pred = lin_reg.predict_stochastic(X_test)
+# lin_reg.performance(y_test, y_pred)
+#
+# Plot the coefficients (vector), and plot each L1, L2, & batch-normal equation accuracy.
+# Plot accuracy of L1 & L2 over epochs = 100,200,300,400,500...1000,5000.
+#
+# plt.plot(lin_reg.theta_pred)
+# plt.plot(lin_reg.weights)
 
 # train l1_reg over 100,200...5000 epochs & store performance1
 
 # train l1_reg over 100,200...5000 epochs & store performance2
 
 # plot performance1 & performance2 on same figure
-
