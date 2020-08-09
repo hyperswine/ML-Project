@@ -82,28 +82,28 @@ Select the top n features of correlation
 sorted_top_n_features =["ram","clock_speed","features_sensors", "scn_bdy_ratio","oem"]
 top_n_features = dict()
 
-#we select top 5 features
-i = 5
-param_grid = {'n_neighbors': np.arange(1,11), 'weights': ['uniform', 'distance'],'algorithm' : ['auto','ball_tree', 'kd_tree','brute']}
-grid_knn = GridSearchCV(KNeighborsClassifier(), param_grid, cv=10, return_train_score=True)
-grid_knn.fit(X_train[sorted_top_n_features[:i+1]], y_train)
+# #Default: we select top 5 features
+# i = 4
+# param_grid = {'n_neighbors': np.arange(1,int(i/2)), 'weights': ['uniform', 'distance'],'algorithm' : ['auto','ball_tree', 'kd_tree','brute']}
+# grid_knn = GridSearchCV(KNeighborsClassifier(), param_grid, return_train_score=True)
+# grid_knn.fit(X_train[sorted_top_n_features[:i+1]], y_train)
 
-estimator = grid_knn.best_estimator_
-y_pred = grid_knn.predict(X_test[sorted_top_n_features[:i+1]])
-result = accuracy_score(y_test, y_pred)
-top_n_features[i] = (result,grid_knn.best_params_)
+# estimator = grid_knn.best_estimator_
+# y_pred = grid_knn.predict(X_test[sorted_top_n_features[:i+1]])
+# result = accuracy_score(y_test, y_pred)
+# top_n_features[i] = (result,grid_knn.best_params_)
 
-print('the best result using top',i+1,'features (',sorted_top_n_features[:i+1] ,') is : ',result,' and the param is:\n',grid_knn.best_params_)
+# print('the best result using top',i+1,'features (',sorted_top_n_features[:i+1] ,') is : ',result,' and the param is:\n',grid_knn.best_params_)
 
-# for i in range(len(sorted_top_n_features)):
+for i in range(len(sorted_top_n_features)):
     
-#     param_grid = {'n_neighbors': np.arange(1,11), 'weights': ['uniform', 'distance'],'algorithm' : ['auto','ball_tree', 'kd_tree','brute']}
-#     grid_knn = GridSearchCV(KNeighborsClassifier(), param_grid, cv=10, return_train_score=True)
-#     grid_knn.fit(X_train[sorted_top_n_features[:i+1]], y_train)
+    param_grid = {'n_neighbors': np.arange(1,11), 'weights': ['uniform', 'distance'],'algorithm' : ['auto','ball_tree', 'kd_tree','brute']}
+    grid_knn = GridSearchCV(KNeighborsClassifier(), param_grid, cv=10, return_train_score=True)
+    grid_knn.fit(X_train[sorted_top_n_features[:i+1]], y_train)
     
-#     estimator = grid_knn.best_estimator_
-#     y_pred = grid_knn.predict(X_test[sorted_top_n_features[:i+1]])
-#     result = accuracy_score(y_test, y_pred)
-#     top_n_features[i] = (result,grid_knn.best_params_)
+    estimator = grid_knn.best_estimator_
+    y_pred = grid_knn.predict(X_test[sorted_top_n_features[:i+1]])
+    result = accuracy_score(y_test, y_pred)
+    top_n_features[i] = (result,grid_knn.best_params_)
     
-#     print('the best result using top',i+1,'features (',sorted_top_n_features[:i+1] ,') is : ',result,' and the param is:\n',grid_knn.best_params_)
+    print('the best result using top',i+1,'features (',sorted_top_n_features[:i+1] ,') is : ',result,' and the param is:\n',grid_knn.best_params_)
