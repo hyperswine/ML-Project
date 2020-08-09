@@ -50,6 +50,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(mX, mY, test_size=.2, random
 Y_train = np.array(Y_train) #.reshape(-1,1)
 Y_test = np.array(Y_test) #.reshape(-1,1)
 
+# Reference: Implementation, COMP9417 Week 6 Tutorial5, Lab6_NeuralLearning_Qs.ipynb
 class NeuralNetwork(object):
     def __init__(self, learning_rate=0.1, epochs=1000, batch_size=None, neural_numbers=[10]):
         self.learning_rate = learning_rate
@@ -198,6 +199,7 @@ class NeuralNetwork(object):
         return np.argmax(y,axis=1)
 
 # test different learn rate
+# Reference: Implementation, COMP9417 Week 6 Tutorial5, Lab6_NeuralLearning_Qs.ipynb
 def test_LearnRate(Learning_rate,inputs,targets):
     nn=NeuralNetwork(learning_rate=Learning_rate)
     nn.fit(inputs,targets)
