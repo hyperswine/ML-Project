@@ -87,7 +87,3 @@ print(d)
 It appears the distances aren't too large as expected with qualitative data.
 However, the kernel density suggests that []
 """
-
-# Plots
-
-

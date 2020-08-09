@@ -122,7 +122,6 @@ class HyperSVM:
         # main loop to predict all examples
         for index, example in X.iterrows():
             for svm_mod in self.svm_models:
-                # TODO: each SvmMod class should have a predict function which takes in a length m row
                 # each SvmMod should also have 2 feature names to take the 2 feature values of that row
                 scores_pair[svm_mod.feature1] = svm_mod.predict(example)
 
@@ -148,20 +147,45 @@ class SvmMod:
     Representation of a binary, (currently) linear SVM.
     """
 
-    def __init__(self, class1, class2):
+    def __init__(self, class1, class2, kernel="gaussian"):
         self.classes = (class1, class2)
         self.a_star = []
+        self.kernels = {"gaussian": gaussian_kern, "linear": lin_kern, "poly": poly_kern, "sigmoid": hyperbolictan_kern}
+        self.kern = kernel
 
 
-    def fit(self, X, y):
+    def fit(self, X, y, C=1):
         """
         Expect - dataframe of two feature columns.
         """
-        # NOTE: y is +/-1
-# a* = argmax<1..n>(-1/2 * sum<i=1..n>( sum<j=1..n>( a[i]*a[j]*y[i]*y[j]*(X[i].dot(X[j]) )) + sum<i=1..n>(a[i]))
-        a_star = []
+
+        # a* = argmax<1..n>(-1/2 * sum<i=1..n>( sum<j=1..n>( a[i]*a[j]*y[i]*y[j]*(K(X[i], X[j]) )) + sum<i=1..n>(a[i]))
+        a = X.shape[0] * [1]
+        gram_X = X.dot(X.T)
+        gram_X_unlabeled = X.T.dot(X.T)
+
+        # NOTE: y = X.shape[0] * [+/-1]
+        a_mult = a * y
+
+        # remove a multiplier given constraint
+        a1 = a_mult[0]
+        a_mult[1:] *= -1;
+        # a1 should be positive with respect to rest of the multipliers
+        if a1 < 0:
+            a1 *= -1
+            a_mult[1:] *= -1
+
+        # expand gram matrix & add multipliers
+        
 
 
+
+        # 0 <= a_i <= C for all i
+        # Solve dual problem via gram matrix
+
+
+    def kernel_function(self, x_i, x_j):
+        return self.kern(x_i, x_j)
 
     def predict(self, X):
         """
@@ -170,6 +194,20 @@ class SvmMod:
         pass
 
 
+def gaussian_kern(x_i, y_i, sigma=.8, rbf=False, gamma=.5):
+    return np.exp(gamma*np.linalg.norm((x_i-y_i)**2) if rbf else -np.linalg.norm((x_i-y_i)**2)/(2*sigma))
+
+def lin_kern(x_i, y_i, k=0):
+    return x_i.dot(y_i) + k
+
+def poly_kern(x_i, y_i, degree=3, k=0):
+    return (x_i.T.dot(y_i)+k)**degree
+
+def hyperbolictan_kern(x_i, y_i, k=0):
+    alpha = 1/x_i.shape[1] # 1/N features
+    return np.tanh(alpha * x_i.T.dot(y_i) + k)
+
+#
 # Kernel function [1]
 
 # 4-F Cross-Validation on [1]
