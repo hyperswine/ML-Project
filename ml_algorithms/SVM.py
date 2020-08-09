@@ -50,30 +50,35 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.metrics import accuracy_score, plot_roc_curve, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 
+labels3 = ['cheap', 'mid-ranged', 'expensive']
+labels3N = [0,1,2]
+labels5 = ['cheap', 'decent', 'mid-ranged', 'expensive', 'premium']
+labels5N = [0,1,2,3,4]
+
 # NOTE: default radial basis kernel
 t0 = time()
 
 svm_clf = make_pipeline(StandardScaler(), SVC(gamma='auto'))
 svm_clf.fit(X_train3, y_train3)
 
-print(f"SVM-3 class classification finished in {time()-t0} seconds")
+print(f"SVM-3 class classification finished in {time() - t0} seconds.")
 
 y_pred3 = svm_clf.predict(X_test3)
 print("3 class accuracy: ", accuracy_score(y_test3, y_pred3))
 print("Classification Report,\n", classification_report(y_test3, y_pred3))
-print("Confusion Matrix\n", confusion_matrix(y_test3, y_pred3))
+print("Confusion Matrix\n", confusion_matrix(y_test3, y_pred3, labels=labels3N))
 # plot_roc_curve(svm_clf, X_test, y_test) - Unfortunately only works for binary pipelines
 
 print("\n\n========NEXT==================================\n\n")
 
 t0 = time()
 svm_clf.fit(X_train5, y_train5)
-print(f"SVM-5 class classification finished in {time()-t0} seconds")
+print(f"SVM-5 class classification finished in {time() - t0} seconds")
 
 y_pred5 = svm_clf.predict(X_test5)
 print("5 class accuracy: ", accuracy_score(y_test5, y_pred5))
 print("Classification Report,\n", classification_report(y_test5, y_pred5))
-print("Confusion Matrix\n", confusion_matrix(y_test5, y_pred5))
+print("Confusion Matrix\n", confusion_matrix(y_test5, y_pred5, labels=labels5N))
 
 print("\n\n========NEXT==================================\n\n")
 
@@ -90,6 +95,7 @@ It appears that 3-class classification would work the best. Accurate SV regressi
 Hence, in the next stage we will build our own multiclass SVM classifier & utilize various nonlinear kernels.
 NOTE: incomplete.
 """
+
 
 class HyperSVM:
     """
@@ -212,7 +218,6 @@ class SvmMod:
         #
         #     self.iterations += 1
 
-
     def kernel_function(self, x_i, x_j):
         return self.kern(x_i, x_j)
 
@@ -272,5 +277,3 @@ def poly_kern(x_i, y_i, degree=3, k=0):
 def hyperbolictan_kern(x_i, y_i, k=0):
     alpha = 1 / x_i.shape[1]  # 1/N features
     return np.tanh(alpha * x_i.T.dot(y_i) + k)
-
-
