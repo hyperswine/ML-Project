@@ -24,3 +24,4 @@ __pycache__
 *plots*
 */Report/*
 *.pptx*
+.DS_Store
